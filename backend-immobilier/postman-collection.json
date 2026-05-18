@@ -1,0 +1,465 @@
+{
+  "info": {
+    "name": "Étoiles du Sine - API",
+    "description": "Collection d'endpoints pour l'API de gestion immobilière",
+    "version": "1.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Vérifier l'état de l'API"
+      },
+      "response": []
+    },
+    {
+      "name": "Utilisateurs",
+      "item": [
+        {
+          "name": "Lister tous les utilisateurs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/utilisateurs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "utilisateurs"]
+            }
+          }
+        },
+        {
+          "name": "Créer un utilisateur",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Diallo\",\n  \"prenom\": \"Amadou\",\n  \"email\": \"amadou@etoiles.com\",\n  \"password\": \"SecurePassword123\",\n  \"role\": \"GESTIONNAIRE\",\n  \"statut\": \"ACTIF\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/utilisateurs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "utilisateurs"]
+            }
+          }
+        },
+        {
+          "name": "Récupérer un utilisateur",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/utilisateurs/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "utilisateurs", "1"]
+            }
+          }
+        },
+        {
+          "name": "Mettre à jour un utilisateur",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"INACTIF\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/utilisateurs/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "utilisateurs", "1"]
+            }
+          }
+        },
+        {
+          "name": "Supprimer un utilisateur",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/utilisateurs/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "utilisateurs", "1"]
+            }
+          }
+        },
+        {
+          "name": "Utilisateurs par rôle",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/utilisateurs/by-role/GESTIONNAIRE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "utilisateurs", "by-role", "GESTIONNAIRE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Propriétaires",
+      "item": [
+        {
+          "name": "Lister tous les propriétaires",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/proprietaires",
+              "host": ["{{base_url}}"],
+              "path": ["api", "proprietaires"]
+            }
+          }
+        },
+        {
+          "name": "Créer un propriétaire",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Sall\",\n  \"prenom\": \"Fatou\",\n  \"telephone\": \"+221789876543\",\n  \"email\": \"fatou.sall@email.com\",\n  \"adresse\": \"45 Avenue Bourguiba, Thiès\",\n  \"cni\": \"9876543210987\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/proprietaires",
+              "host": ["{{base_url}}"],
+              "path": ["api", "proprietaires"]
+            }
+          }
+        },
+        {
+          "name": "Biens d'un propriétaire",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/proprietaires/1/biens",
+              "host": ["{{base_url}}"],
+              "path": ["api", "proprietaires", "1", "biens"]
+            }
+          }
+        },
+        {
+          "name": "Contrats d'un propriétaire",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/proprietaires/1/contrats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "proprietaires", "1", "contrats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Locataires",
+      "item": [
+        {
+          "name": "Lister tous les locataires",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/locataires",
+              "host": ["{{base_url}}"],
+              "path": ["api", "locataires"]
+            }
+          }
+        },
+        {
+          "name": "Créer un locataire",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Cisse\",\n  \"prenom\": \"Ibrahim\",\n  \"telephone\": \"+221781112233\",\n  \"email\": \"ibrahim.cisse@email.com\",\n  \"profession\": \"Cadre Administratif\",\n  \"adresse\": \"456 Rue de la Paix, Thiès\",\n  \"cni\": \"3691470258369\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/locataires",
+              "host": ["{{base_url}}"],
+              "path": ["api", "locataires"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Biens",
+      "item": [
+        {
+          "name": "Lister tous les biens",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/biens",
+              "host": ["{{base_url}}"],
+              "path": ["api", "biens"]
+            }
+          }
+        },
+        {
+          "name": "Créer un bien",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"BIEN-001\",\n  \"type\": \"APPARTEMENT\",\n  \"adresse\": \"123 Avenue Cheikh Anta Diop\",\n  \"ville\": \"Dakar\",\n  \"code_postal\": \"18000\",\n  \"surface\": 85.00,\n  \"nombre_pieces\": 3,\n  \"loyer_mensuel\": 250000.00,\n  \"statut\": \"LIBRE\",\n  \"description\": \"Bel appartement moderne\",\n  \"id_proprietaire\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/biens",
+              "host": ["{{base_url}}"],
+              "path": ["api", "biens"]
+            }
+          }
+        },
+        {
+          "name": "Biens par statut",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/biens/by-statut/LIBRE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "biens", "by-statut", "LIBRE"]
+            }
+          }
+        },
+        {
+          "name": "Biens par ville",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/biens/by-ville/Dakar",
+              "host": ["{{base_url}}"],
+              "path": ["api", "biens", "by-ville", "Dakar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contrats",
+      "item": [
+        {
+          "name": "Lister tous les contrats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/contrats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contrats"]
+            }
+          }
+        },
+        {
+          "name": "Créer un contrat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"CONT-2024-001\",\n  \"type_contrat\": \"LOCATAIRE\",\n  \"date_debut\": \"2024-01-01\",\n  \"date_fin\": \"2025-12-31\",\n  \"montant\": 250000.00,\n  \"statut\": \"ACTIF\",\n  \"id_bien\": 1,\n  \"id_proprietaire\": 1,\n  \"id_locataire\": 1,\n  \"id_user_createur\": 1,\n  \"notes\": \"Contrat de location\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/contrats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contrats"]
+            }
+          }
+        },
+        {
+          "name": "Contrats actifs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/contrats/actifs",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contrats", "actifs"]
+            }
+          }
+        },
+        {
+          "name": "Contrats en cours",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/contrats/en-cours",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contrats", "en-cours"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paiements",
+      "item": [
+        {
+          "name": "Lister tous les paiements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/paiements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "paiements"]
+            }
+          }
+        },
+        {
+          "name": "Créer un paiement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"PAI-2024-001\",\n  \"date_paiement\": \"2024-05-01\",\n  \"montant\": 250000.00,\n  \"mode_paiement\": \"VIREMENT\",\n  \"statut\": \"PAYE\",\n  \"id_contrat\": 1,\n  \"id_user_enregistrement\": 1,\n  \"notes\": \"Loyer mai 2024\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/paiements",
+              "host": ["{{base_url}}"],
+              "path": ["api", "paiements"]
+            }
+          }
+        },
+        {
+          "name": "Paiements payés",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/paiements/payes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "paiements", "payes"]
+            }
+          }
+        },
+        {
+          "name": "Paiements en attente",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/paiements/en-attente",
+              "host": ["{{base_url}}"],
+              "path": ["api", "paiements", "en-attente"]
+            }
+          }
+        },
+        {
+          "name": "Statistiques paiements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/paiements/statistiques",
+              "host": ["{{base_url}}"],
+              "path": ["api", "paiements", "statistiques"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Historique & Audit",
+      "item": [
+        {
+          "name": "Lister tout l'historique",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/historique",
+              "host": ["{{base_url}}"],
+              "path": ["api", "historique"]
+            }
+          }
+        },
+        {
+          "name": "Historique par utilisateur",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/historique/by-user/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "historique", "by-user", "1"]
+            }
+          }
+        },
+        {
+          "name": "Historique par type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/historique/by-type/INSERT",
+              "host": ["{{base_url}}"],
+              "path": ["api", "historique", "by-type", "INSERT"]
+            }
+          }
+        },
+        {
+          "name": "Historique récent (7 jours)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/historique/recent/7",
+              "host": ["{{base_url}}"],
+              "path": ["api", "historique", "recent", "7"]
+            }
+          }
+        },
+        {
+          "name": "Statistiques audit",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/historique/statistiques",
+              "host": ["{{base_url}}"],
+              "path": ["api", "historique", "statistiques"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ]
+}
