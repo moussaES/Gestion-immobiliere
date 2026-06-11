@@ -1,0 +1,57 @@
+<div class="dashboard-page">
+  <h2 class="page-title">Tableau de bord</h2>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <div class="stats-grid" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-icon">🏠</div>
+      <div class="stat-value">{{ stats.total_biens }}</div>
+      <div class="stat-label">Total biens</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value">{{ stats.biens_libres }}</div>
+      <div class="stat-label">Biens libres</div>
+    </div>
+    <div class="stat-card warning">
+      <div class="stat-icon">🔒</div>
+      <div class="stat-value">{{ stats.biens_occupes }}</div>
+      <div class="stat-label">Biens occupés</div>
+    </div>
+    <div class="stat-card info">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value">{{ stats.revenu_mensuel | number }} FCFA</div>
+      <div class="stat-label">Revenu mensuel</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👤</div>
+      <div class="stat-value">{{ stats.total_proprietaires }}</div>
+      <div class="stat-label">Propriétaires</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value">{{ stats.total_locataires }}</div>
+      <div class="stat-label">Locataires</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-icon">📄</div>
+      <div class="stat-value">{{ stats.contrats_actifs }}</div>
+      <div class="stat-label">Contrats actifs</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-value">{{ stats.paiements_en_attente }}</div>
+      <div class="stat-label">Paiements en attente</div>
+    </div>
+  </div>
+
+  <!-- Taux d'occupation -->
+  <div class="occupation-bar" *ngIf="stats">
+    <span>Taux d'occupation</span>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="stats.taux_occupation"></div>
+    </div>
+    <strong>{{ stats.taux_occupation }}%</strong>
+  </div>
+</div>

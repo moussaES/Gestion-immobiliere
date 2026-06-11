@@ -1,0 +1,70 @@
+<div class="page-container" [ngClass]="{'embedded-form': isEmbedded}">
+  <div class="page-header" *ngIf="!isEmbedded">
+    <h2>{{ isEdit ? 'Modifier le propriétaire' : 'Nouveau propriétaire' }}</h2>
+    <a routerLink="/proprietaires" class="btn btn-secondary">← Retour</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-card">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nom *</label>
+        <input formControlName="nom" placeholder="Nom">
+        <span class="error" *ngIf="form.get('nom')?.invalid && form.get('nom')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Prénom *</label>
+        <input formControlName="prenom" placeholder="Prénom">
+        <span class="error" *ngIf="form.get('prenom')?.invalid && form.get('prenom')?.touched">
+          Requis
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Téléphone *</label>
+        <input formControlName="telephone" placeholder="Numéro de téléphone">
+        <span class="error" *ngIf="form.get('telephone')?.invalid && form.get('telephone')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" formControlName="email" placeholder="email@exemple.com">
+        <span class="error" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+          Email valide requis
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Adresse *</label>
+        <input formControlName="adresse" placeholder="Adresse complète">
+        <span class="error" *ngIf="form.get('adresse')?.invalid && form.get('adresse')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>CNI *</label>
+        <input formControlName="cni" placeholder="Numéro CNI">
+        <span class="error" *ngIf="form.get('cni')?.invalid && form.get('cni')?.touched">
+          Requis
+        </span>
+      </div>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
+
+    <div class="form-actions">
+      <a routerLink="/proprietaires" class="btn btn-secondary" *ngIf="!isEmbedded">Annuler</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Enregistrement...' : (isEdit ? 'Enregistrer les modifications' : 'Créer') }}
+      </button>
+    </div>
+
+  </form>
+</div>

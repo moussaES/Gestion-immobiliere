@@ -1,0 +1,117 @@
+<div class="fiche-section">
+  <div class="back-btn" (click)="back()">
+    <i class="fas fa-arrow-left"></i> Retour aux Propriétaires
+  </div>
+
+  <div class="fiche-header" *ngIf="proprietaire">
+    <div class="header-info">
+      <div class="avatar">{{ proprietaire.nom.charAt(0).toUpperCase() }}</div>
+      <div>
+        <h2>{{ proprietaire.nom }} {{ proprietaire.prenom }}</h2>
+        <p class="contact-info">
+          <i class="fas fa-phone"></i> {{ proprietaire.telephone }} | 
+          <i class="fas fa-envelope"></i> {{ proprietaire.email }}
+        </p>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi-item">
+        <div class="kpi-value">{{ biens.length }}</div>
+        <div class="kpi-label">Biens</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab-header">
+      <button [class.active]="activeTab === 'infos'" (click)="activeTab = 'infos'">
+        Informations
+      </button>
+      <button [class.active]="activeTab === 'biens'" (click)="activeTab = 'biens'">
+        Biens ({{ biens.length }})
+      </button>
+      <button [class.active]="activeTab === 'contrats'" (click)="activeTab = 'contrats'">
+        Contrats
+      </button>
+      <button [class.active]="activeTab === 'paiements'" (click)="activeTab = 'paiements'">
+        Paiements
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Onglet Informations -->
+      <div *ngIf="activeTab === 'infos' && proprietaire" class="tab-pane">
+        <div class="list-header" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+          <button class="btn" [ngClass]="editMode ? 'btn-secondary' : 'btn-outline-primary'" (click)="toggleEditMode()">
+            <i class="fas" [ngClass]="editMode ? 'fa-times' : 'fa-pencil-alt'"></i>
+            {{ editMode ? 'Annuler la modification' : 'Modifier les informations' }}
+          </button>
+        </div>
+
+        <div *ngIf="!editMode" class="info-grid">
+          <div class="info-item">
+            <label>Nom & Prénom</label>
+            <p>{{ proprietaire.nom }} {{ proprietaire.prenom }}</p>
+          </div>
+          <div class="info-item">
+            <label>Téléphone</label>
+            <p>{{ proprietaire.telephone }}</p>
+          </div>
+          <div class="info-item">
+            <label>Email</label>
+            <p>{{ proprietaire.email }}</p>
+          </div>
+          <div class="info-item">
+            <label>N° CNI</label>
+            <p>{{ proprietaire.cni }}</p>
+          </div>
+          <div class="info-item">
+            <label>Adresse</label>
+            <p>{{ proprietaire.adresse }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="editMode">
+          <app-proprietaire-form [propId]="proprietaire.id!" [isEmbedded]="true"></app-proprietaire-form>
+        </div>
+      </div>
+
+      <!-- Onglet Biens -->
+      <div *ngIf="activeTab === 'biens'" class="tab-pane">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Type</th>
+                <th>Adresse</th>
+                <th>Surface</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let bien of biens">
+                <td>{{ bien.reference }}</td>
+                <td>{{ bien.type }}</td>
+                <td>{{ bien.adresse }}</td>
+                <td>{{ bien.surface ? bien.surface + ' m²' : 'N/A' }}</td>
+                <td><span class="badge badge-actif">{{ bien.statut }}</span></td>
+              </tr>
+              <tr *ngIf="biens.length === 0">
+                <td colspan="5" class="empty-state">Aucun bien trouvé.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'contrats'" class="tab-pane">
+        <p class="empty-state"><i class="fas fa-file-contract fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Contrats (liés aux biens du propriétaire) à venir.</p>
+      </div>
+
+      <div *ngIf="activeTab === 'paiements'" class="tab-pane">
+        <p class="empty-state"><i class="fas fa-money-bill-wave fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Paiements (reversés au propriétaire) à venir.</p>
+      </div>
+    </div>
+  </div>
+</div>

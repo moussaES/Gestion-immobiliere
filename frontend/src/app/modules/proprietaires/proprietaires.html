@@ -1,0 +1,52 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Propriétaires</h2>
+    <a routerLink="nouveau" class="btn btn-primary">+ Ajouter un propriétaire</a>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters">
+    <input type="text" [(ngModel)]="searchTerm"
+           (input)="onSearch()" placeholder="Rechercher par nom, email...">
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <table class="data-table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>CNI</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let prop of proprietaires">
+        <td><strong>{{ prop.nom }}</strong></td>
+        <td>{{ prop.prenom }}</td>
+        <td>{{ prop.email }}</td>
+        <td>{{ prop.telephone }}</td>
+        <td>{{ prop.cni }}</td>
+        <td class="actions">
+          <a [routerLink]="['/proprietaires/modifier', prop.id]" class="btn-icon">✏️</a>
+          <button (click)="supprimer(prop.id!)" class="btn-icon danger">🗑️</button>
+        </td>
+      </tr>
+      <tr *ngIf="proprietaires.length === 0">
+        <td colspan="6" class="empty">Aucun propriétaire trouvé</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button (click)="changerPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+    <span>Page {{ currentPage }} / {{ totalPages }}</span>
+    <button (click)="changerPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
+  </div>
+
+</div>

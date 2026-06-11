@@ -1,0 +1,63 @@
+<div class="page-container">
+
+  <div class="page-header">
+    <h2>Biens immobiliers</h2>
+    <a routerLink="nouveau" class="btn btn-primary">+ Ajouter un bien</a>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters">
+    <input type="text" [(ngModel)]="searchTerm"
+           (input)="onSearch()" placeholder="Rechercher...">
+    <select [(ngModel)]="filtreStatut" (change)="onSearch()">
+      <option value="">Tous les statuts</option>
+      <option value="libre">Libre</option>
+      <option value="occupe">Occupé</option>
+      <option value="reserve">Réservé</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="loading">Chargement...</div>
+
+  <table class="data-table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Référence</th>
+        <th>Type</th>
+        <th>Adresse</th>
+        <th>Loyer</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let bien of biens">
+        <td><strong>{{ bien.reference }}</strong></td>
+        <td>{{ bien.type }}</td>
+        <td>{{ bien.adresse }}, {{ bien.ville }}</td>
+        <td>{{ bien.loyer_mensuel | number }} FCFA</td>
+        <td>
+          <span class="badge" [ngClass]="'badge-' + bien.statut">
+            {{ bien.statut }}
+          </span>
+        </td>
+        <td class="actions">
+          <!-- Pas de fiche bien pour l'instant -->
+          <a [routerLink]="['/biens/modifier', bien.id]" class="btn-icon">✏️</a>
+          <button (click)="supprimer(bien.id!)" class="btn-icon danger">🗑️</button>
+        </td>
+      </tr>
+      <tr *ngIf="biens.length === 0">
+        <td colspan="6" class="empty">Aucun bien trouvé</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button (click)="changerPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+    <span>Page {{ currentPage }} / {{ totalPages }}</span>
+    <button (click)="changerPage(currentPage + 1)" [disabled]="currentPage === totalPages">›</button>
+  </div>
+
+</div>

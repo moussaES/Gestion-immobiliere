@@ -1,0 +1,100 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>{{ isEdit ? 'Modifier le contrat' : 'Nouveau contrat' }}</h2>
+    <a routerLink="/contrats" class="btn btn-secondary">← Retour</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-card">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Référence *</label>
+        <input formControlName="reference" placeholder="CTR-001">
+        <span class="error" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Type *</label>
+        <select formControlName="type">
+          <option value="location">Location</option>
+          <option value="gestion">Gestion</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date de début *</label>
+        <input type="date" formControlName="date_debut">
+        <span class="error" *ngIf="form.get('date_debut')?.invalid && form.get('date_debut')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Date de fin *</label>
+        <input type="date" formControlName="date_fin">
+        <span class="error" *ngIf="form.get('date_fin')?.invalid && form.get('date_fin')?.touched">
+          Requis
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Montant (FCFA) *</label>
+        <input type="number" formControlName="montant">
+      </div>
+      <div class="form-group">
+        <label>Dépôt de garantie (FCFA) *</label>
+        <input type="number" formControlName="depot_garantie">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Statut *</label>
+        <select formControlName="statut">
+          <option value="actif">Actif</option>
+          <option value="resilie">Résilié</option>
+          <option value="expire">Expiré</option>
+          <option value="archive">Archivé</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Bien *</label>
+        <select formControlName="id_bien">
+          <option [value]="null">-- Sélectionner un bien --</option>
+          <option *ngFor="let b of biens" [value]="b.id">{{ b.reference }} - {{ b.adresse }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Locataire *</label>
+        <select formControlName="id_locataire">
+          <option [value]="null">-- Sélectionner un locataire --</option>
+          <option *ngFor="let l of locataires" [value]="l.id">{{ l.nom }} {{ l.prenom }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Propriétaire *</label>
+        <select formControlName="id_proprietaire">
+          <option [value]="null">-- Sélectionner un propriétaire --</option>
+          <option *ngFor="let p of proprietaires" [value]="p.id">{{ p.nom }} {{ p.prenom }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
+
+    <div class="form-actions">
+      <a routerLink="/contrats" class="btn btn-secondary">Annuler</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Enregistrement...' : (isEdit ? 'Modifier' : 'Créer') }}
+      </button>
+    </div>
+
+  </form>
+</div>

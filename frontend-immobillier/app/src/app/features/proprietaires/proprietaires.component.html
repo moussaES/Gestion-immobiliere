@@ -1,0 +1,65 @@
+<div class="proprietaires-section">
+  <div class="page-header">
+    <span class="page-title">Propriétaires</span>
+    <button class="btn-create" (click)="openCreateModal()">
+      <i class="fas fa-plus"></i> AJOUTER PROPRIÉTAIRE
+    </button>
+  </div>
+
+  <div class="filters">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Rechercher...">
+    </div>
+  </div>
+
+  <app-table 
+    [columns]="columns"
+    [rows]="proprietaires"
+    [currentPage]="currentPage"
+    [itemsPerPage]="itemsPerPage"
+    [totalPages]="totalPages"
+    (onView)="viewProprietaire($event)">
+  </app-table>
+</div>
+
+<!-- Modal Ajouter Propriétaire -->
+<app-modal 
+  [isOpen]="isCreateModalOpen"
+  title="Ajouter un Propriétaire"
+  iconClass="fas fa-user-plus"
+  saveButtonText="Ajouter le propriétaire"
+  (onClose)="closeModal()"
+  (onSave)="saveProprietaire()">
+  
+  <div class="form-row">
+    <div class="form-group">
+      <label>Prénom *</label>
+      <input type="text" placeholder="Ex: Khadija" [(ngModel)]="formData.prenom">
+    </div>
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" placeholder="Ex: Gueye" [(ngModel)]="formData.nom">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Téléphone *</label>
+      <input type="text" placeholder="Ex: +221 77 123 45 67" [(ngModel)]="formData.telephone">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" placeholder="Ex: khadija.gueye@mail.com" [(ngModel)]="formData.email">
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>Adresse *</label>
+      <input type="text" placeholder="Ex: Rue du Port, Podor" [(ngModel)]="formData.adresse">
+    </div>
+    <div class="form-group">
+      <label>N° CNI (Carte d'identité)</label>
+      <input type="text" placeholder="Ex: 1234567890123" [(ngModel)]="formData.cni">
+    </div>
+  </div>
+</app-modal>

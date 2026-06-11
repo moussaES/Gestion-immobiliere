@@ -1,0 +1,71 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>{{ isEdit ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+    <a routerLink="/utilisateurs" class="btn btn-secondary">← Retour</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-card">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nom *</label>
+        <input formControlName="nom" placeholder="Nom">
+        <span class="error" *ngIf="form.get('nom')?.invalid && form.get('nom')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Prénom *</label>
+        <input formControlName="prenom" placeholder="Prénom">
+        <span class="error" *ngIf="form.get('prenom')?.invalid && form.get('prenom')?.touched">
+          Requis
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" formControlName="email" placeholder="email@exemple.com">
+        <span class="error" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+          Email valide requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Mot de passe <span *ngIf="!isEdit">*</span></label>
+        <input type="password" formControlName="password" placeholder="***">
+        <span class="error" *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+          {{ isEdit ? 'Invalide' : 'Requis (min 6 caractères)' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Rôle *</label>
+        <select formControlName="role">
+          <option value="ADMIN">Administrateur</option>
+          <option value="GESTIONNAIRE">Gestionnaire</option>
+          <option value="COMPTABLE">Comptable</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Statut *</label>
+        <select formControlName="statut">
+          <option value="actif">Actif</option>
+          <option value="inactif">Inactif</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
+
+    <div class="form-actions">
+      <a routerLink="/utilisateurs" class="btn btn-secondary">Annuler</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Enregistrement...' : (isEdit ? 'Modifier' : 'Créer') }}
+      </button>
+    </div>
+
+  </form>
+</div>

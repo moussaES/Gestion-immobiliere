@@ -1,0 +1,86 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>{{ isEdit ? 'Modifier le paiement' : 'Nouveau paiement' }}</h2>
+    <a routerLink="/paiements" class="btn btn-secondary">← Retour</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-card">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Référence *</label>
+        <input formControlName="reference" placeholder="PAI-001">
+        <span class="error" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Date de paiement *</label>
+        <input type="date" formControlName="date_paiement">
+        <span class="error" *ngIf="form.get('date_paiement')?.invalid && form.get('date_paiement')?.touched">
+          Requis
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Montant (FCFA) *</label>
+        <input type="number" formControlName="montant">
+      </div>
+      <div class="form-group">
+        <label>Mois concerné *</label>
+        <input formControlName="mois_concerne" placeholder="ex: Janvier 2024">
+        <span class="error" *ngIf="form.get('mois_concerne')?.invalid && form.get('mois_concerne')?.touched">
+          Requis
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Mode de paiement *</label>
+        <select formControlName="mode">
+          <option value="especes">Espèces</option>
+          <option value="virement">Virement</option>
+          <option value="cheque">Chèque</option>
+          <option value="wave">Wave</option>
+          <option value="orange_money">Orange Money</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Statut *</label>
+        <select formControlName="statut">
+          <option value="paye">Payé</option>
+          <option value="partiel">Partiel</option>
+          <option value="en_attente">En attente</option>
+          <option value="retard">En retard</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Contrat *</label>
+        <select formControlName="id_contrat">
+          <option [value]="null">-- Sélectionner un contrat --</option>
+          <option *ngFor="let c of contrats" [value]="c.id">{{ c.reference }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea formControlName="note" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
+
+    <div class="form-actions">
+      <a routerLink="/paiements" class="btn btn-secondary">Annuler</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Enregistrement...' : (isEdit ? 'Modifier' : 'Créer') }}
+      </button>
+    </div>
+
+  </form>
+</div>

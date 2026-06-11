@@ -1,0 +1,45 @@
+<div class="app-layout" *ngIf="isLoggedIn(); else publicLayout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="app-logo">Étoiles du Sine</h3>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <span class="icon">📊</span> Tableau de bord
+      </a>
+      <a routerLink="/biens" routerLinkActive="active">
+        <span class="icon">🏠</span> Biens immobiliers
+      </a>
+      <a routerLink="/proprietaires" routerLinkActive="active">
+        <span class="icon">👤</span> Propriétaires
+      </a>
+      <a routerLink="/locataires" routerLinkActive="active">
+        <span class="icon">👥</span> Locataires
+      </a>
+      <a routerLink="/contrats" routerLinkActive="active">
+        <span class="icon">📄</span> Contrats
+      </a>
+      <a routerLink="/paiements" routerLinkActive="active">
+        <span class="icon">💰</span> Paiements
+      </a>
+      <a *ngIf="isAdmin()" routerLink="/utilisateurs" routerLinkActive="active">
+        <span class="icon">⚙️</span> Utilisateurs
+      </a>
+      <a *ngIf="isAdmin()" routerLink="/historique" routerLinkActive="active">
+        <span class="icon">⏳</span> Historique
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button (click)="logout()" class="btn-logout">
+        <span class="icon">🚪</span> Déconnexion
+      </button>
+    </div>
+  </aside>
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<ng-template #publicLayout>
+  <router-outlet></router-outlet>
+</ng-template>

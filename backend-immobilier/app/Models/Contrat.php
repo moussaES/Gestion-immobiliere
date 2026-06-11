@@ -37,6 +37,18 @@ class Contrat extends Model
         'montant' => 'decimal:2',
     ];
 
+    protected $appends = ['commission_agence', 'montant_proprietaire'];
+
+    public function getCommissionAgenceAttribute()
+    {
+        return $this->montant ? round($this->montant * 0.10, 2) : 0;
+    }
+
+    public function getMontantProprietaireAttribute()
+    {
+        return $this->montant ? round($this->montant * 0.90, 2) : 0;
+    }
+
     // Relations
     public function bien()
     {

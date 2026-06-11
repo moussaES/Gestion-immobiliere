@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Contrat;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Response;
 
 class ContratController extends Controller
 {
@@ -225,6 +227,111 @@ class ContratController extends Controller
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Exporter un contrat spécifique en PDF
+     */
+    public function exportPdf($id)
+    {
+        try {
+            $contrat = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur', 'paiements')->findOrFail($id);
+            $pdf = Pdf::loadView('exports.contrat', compact('contrat'));
+            return $pdf->download("contrat_{$contrat->reference}.pdf");
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Exporter un contrat spécifique en CSV
+     */
+    public function exportCsv($id)
+    {
+        try {
+            $contrat = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur')->findOrFail($id);
+            
+            $csvHeader = ["Référence", "Type", "Date Début", "Date Fin", "Montant", "Commission (10%)", "Part Propriétaire (90%)", "Statut", "Locataire", "Propriétaire", "Bien"];
+            $csvRow = [
+                $contrat->reference,
+                $contrat->type_contrat,
+                $contrat->date_debut ? $contrat->date_debut->format('Y-m-d') : '',
+                $contrat->date_fin ? $contrat->date_fin->format('Y-m-d') : '',
+                $contrat->montant,
+                $contrat->commission_agence,
+                $contrat->montant_proprietaire,
+                $contrat->statut,
+                $contrat->locataire ? $contrat->locataire->nom . ' ' . $contrat->locataire->prenom : 'N/A',
+                $contrat->proprietaire ? $contrat->proprietaire->nom . ' ' . $contrat->proprietaire->prenom : 'N/A',
+                $contrat->bien ? $contrat->bien->nom_bien : 'N/A'
+            ];
+
+            $csvData = implode(';', $csvHeader) . "\n" . implode(';', $csvRow) . "\n";
+
+            // Ajout du BOM UTF-8 pour Excel
+            $csvData = "\xEF\xBB\xBF" . $csvData;
+
+            return Response::make($csvData, 200, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="contrat_' . $contrat->reference . '.csv"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Exporter tous les contrats en PDF
+     */
+    public function exportAllPdf()
+    {
+        try {
+            $contrats = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur')->get();
+            $pdf = Pdf::loadView('exports.contrats_list', compact('contrats'))->setPaper('a4', 'landscape');
+            return $pdf->download("liste_contrats.pdf");
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Exporter tous les contrats en CSV
+     */
+    public function exportAllCsv()
+    {
+        try {
+            $contrats = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur')->get();
+            
+            $csvHeader = ["Référence", "Type", "Date Début", "Date Fin", "Montant", "Commission (10%)", "Part Propriétaire (90%)", "Statut", "Locataire", "Propriétaire", "Bien"];
+            $csvData = implode(';', $csvHeader) . "\n";
+            
+            foreach ($contrats as $contrat) {
+                $csvRow = [
+                    $contrat->reference,
+                    $contrat->type_contrat,
+                    $contrat->date_debut ? $contrat->date_debut->format('Y-m-d') : '',
+                    $contrat->date_fin ? $contrat->date_fin->format('Y-m-d') : '',
+                    $contrat->montant,
+                    $contrat->commission_agence,
+                    $contrat->montant_proprietaire,
+                    $contrat->statut,
+                    $contrat->locataire ? $contrat->locataire->nom . ' ' . $contrat->locataire->prenom : 'N/A',
+                    $contrat->proprietaire ? $contrat->proprietaire->nom . ' ' . $contrat->proprietaire->prenom : 'N/A',
+                    $contrat->bien ? $contrat->bien->nom_bien : 'N/A'
+                ];
+                $csvData .= implode(';', $csvRow) . "\n";
+            }
+
+            // Ajout du BOM UTF-8 pour Excel
+            $csvData = "\xEF\xBB\xBF" . $csvData;
+
+            return Response::make($csvData, 200, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="liste_contrats.csv"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

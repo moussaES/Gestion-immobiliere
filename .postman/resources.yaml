@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 43c72983-798e-47f0-8b1c-2dc4d961f540
+
+localResources:
+  collections:
+    - ..\backend-immobilier\postman-collection.json

@@ -17,6 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('api')->group(function () {
 
     // ====================================================================
+    // Routes: AUTHENTIFICATION
+    // ====================================================================
+    Route::post('auth/login', [\App\Http\Controllers\AuthController::class, 'login']);
+    Route::post('auth/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
+
+    // ====================================================================
     // Routes: UTILISATEURS
     // ====================================================================
     Route::prefix('utilisateurs')->group(function () {
@@ -73,9 +79,13 @@ Route::middleware('api')->group(function () {
     // Routes: CONTRATS
     // ====================================================================
     Route::prefix('contrats')->group(function () {
+        Route::get('export/pdf', [ContratController::class, 'exportAllPdf']);         // GET /api/contrats/export/pdf
+        Route::get('export/csv', [ContratController::class, 'exportAllCsv']);         // GET /api/contrats/export/csv
         Route::get('/', [ContratController::class, 'index']);                        // GET /api/contrats
         Route::post('/', [ContratController::class, 'store']);                       // POST /api/contrats
         Route::get('{id}', [ContratController::class, 'show']);                      // GET /api/contrats/{id}
+        Route::get('{id}/export/pdf', [ContratController::class, 'exportPdf']);      // GET /api/contrats/{id}/export/pdf
+        Route::get('{id}/export/csv', [ContratController::class, 'exportCsv']);      // GET /api/contrats/{id}/export/csv
         Route::put('{id}', [ContratController::class, 'update']);                    // PUT /api/contrats/{id}
         Route::delete('{id}', [ContratController::class, 'destroy']);                // DELETE /api/contrats/{id}
         Route::get('actifs', [ContratController::class, 'actifs']);                  // GET /api/contrats/actifs

@@ -1,0 +1,92 @@
+<div class="page-container" [ngClass]="{'embedded-form': isEmbedded}">
+  <div class="page-header" *ngIf="!isEmbedded">
+    <h2>{{ isEdit ? 'Modifier le bien' : 'Nouveau bien' }}</h2>
+    <a routerLink="/biens" class="btn btn-secondary">← Retour</a>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-card">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Référence *</label>
+        <input formControlName="reference" placeholder="BIEN-001">
+        <span class="error" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
+          Requis
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Type *</label>
+        <select formControlName="type">
+          <option value="appartement">Appartement</option>
+          <option value="maison">Maison</option>
+          <option value="terrain">Terrain</option>
+          <option value="immeuble">Immeuble</option>
+          <option value="bureau">Bureau</option>
+          <option value="commerce">Commerce</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Adresse *</label>
+        <input formControlName="adresse" placeholder="123 Rue...">
+      </div>
+      <div class="form-group">
+        <label>Ville *</label>
+        <input formControlName="ville" placeholder="Dakar">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Surface (m²) *</label>
+        <input type="number" formControlName="surface">
+      </div>
+      <div class="form-group">
+        <label>Loyer mensuel (FCFA) *</label>
+        <input type="number" formControlName="loyer_mensuel">
+      </div>
+      <div class="form-group">
+        <label>Charges (FCFA)</label>
+        <input type="number" formControlName="charges">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Statut *</label>
+        <select formControlName="statut">
+          <option value="libre">Libre</option>
+          <option value="occupe">Occupé</option>
+          <option value="reserve">Réservé</option>
+          <option value="travaux">En travaux</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Propriétaire *</label>
+        <select formControlName="id_proprietaire">
+          <option [value]="null">-- Sélectionner --</option>
+          <option *ngFor="let p of proprietaires" [value]="p.id">
+            {{ p.nom }} {{ p.prenom }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea formControlName="description" rows="3"></textarea>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
+
+    <div class="form-actions">
+      <a routerLink="/biens" class="btn btn-secondary" *ngIf="!isEmbedded">Annuler</a>
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Enregistrement...' : (isEdit ? 'Enregistrer les modifications' : 'Créer') }}
+      </button>
+    </div>
+
+  </form>
+</div>
