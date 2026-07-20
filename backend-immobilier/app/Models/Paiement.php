@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Paiement extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\LogsHistorique;
 
     protected $table = 'paiements';
     protected $primaryKey = 'id_paiement';

@@ -1,41 +1,65 @@
 <div class="app-layout" *ngIf="isLoggedIn(); else publicLayout">
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <h3 class="app-logo">Étoiles du Sine</h3>
+  <!-- Top Header -->
+  <header class="top-header">
+    <div class="top-header-left">
+      <button class="menu-toggle" (click)="toggleSidebar()">≡</button>
+      <h3 class="app-logo">
+        <img src="assets/logo.jpeg" alt="Logo" class="agency-logo" />
+        Étoiles du Sine
+      </h3>
     </div>
-    <nav class="sidebar-nav">
-      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <span class="icon">📊</span> Tableau de bord
-      </a>
-      <a routerLink="/biens" routerLinkActive="active">
-        <span class="icon">🏠</span> Biens immobiliers
-      </a>
-      <a routerLink="/proprietaires" routerLinkActive="active">
-        <span class="icon">👤</span> Propriétaires
-      </a>
-      <a routerLink="/locataires" routerLinkActive="active">
-        <span class="icon">👥</span> Locataires
-      </a>
-      <a routerLink="/contrats" routerLinkActive="active">
-        <span class="icon">📄</span> Contrats
-      </a>
-      <a routerLink="/paiements" routerLinkActive="active">
-        <span class="icon">💰</span> Paiements
-      </a>
-      <a *ngIf="isAdmin()" routerLink="/utilisateurs" routerLinkActive="active">
-        <span class="icon">⚙️</span> Utilisateurs
-      </a>
-      <a *ngIf="isAdmin()" routerLink="/historique" routerLinkActive="active">
-        <span class="icon">⏳</span> Historique
-      </a>
-    </nav>
-    <div class="sidebar-footer">
-      <button (click)="logout()" class="btn-logout">
-        <span class="icon">🚪</span> Déconnexion
+    
+    <div class="top-header-right">
+      <div class="user-info" *ngIf="currentUser">
+        <div class="user-details">
+          <span class="user-name">{{ currentUser.prenom }} {{ currentUser.nom }}</span>
+          <span class="user-role-email">{{ currentUser.role }} | {{ currentUser.email }}</span>
+        </div>
+        <div class="user-avatar">
+          👤
+        </div>
+      </div>
+      <button (click)="logout()" class="btn-logout-header">
+        Se déconnecter
       </button>
     </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="isSidebarCollapsed">
+    <nav class="sidebar-nav">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <span class="icon">📊</span> <span class="nav-text">Tableau de bord</span>
+      </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/biens" routerLinkActive="active">
+        <span class="icon">🏠</span> <span class="nav-text">Biens immobiliers</span>
+      </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/proprietaires" routerLinkActive="active">
+        <span class="icon">👤</span> <span class="nav-text">Propriétaires</span>
+      </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/locataires" routerLinkActive="active">
+        <span class="icon">👥</span> <span class="nav-text">Locataires</span>
+      </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/contrats" routerLinkActive="active">
+        <span class="icon">📄</span> <span class="nav-text">Contrats</span>
+      </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/paiements" routerLinkActive="active">
+        <span class="icon">💰</span> <span class="nav-text">Paiements</span>
+      </a>
+      <a routerLink="/documents" routerLinkActive="active">
+        <span class="icon">📂</span> <span class="nav-text">Documents</span>
+      </a>
+      <a *ngIf="isAdmin()" routerLink="/utilisateurs" routerLinkActive="active">
+        <span class="icon">⚙️</span> <span class="nav-text">Utilisateurs</span>
+      </a>
+      <a *ngIf="isAdmin()" routerLink="/historique" routerLinkActive="active">
+        <span class="icon">⏳</span> <span class="nav-text">Historique</span>
+      </a>
+    </nav>
   </aside>
-  <main class="main-content">
+
+  <!-- Main Content -->
+  <main class="main-content" [class.collapsed]="isSidebarCollapsed">
     <router-outlet></router-outlet>
   </main>
 </div>
@@ -43,3 +67,5 @@
 <ng-template #publicLayout>
   <router-outlet></router-outlet>
 </ng-template>
+
+<app-toast></app-toast>

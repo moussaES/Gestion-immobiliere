@@ -9,20 +9,19 @@
     <div class="form-row">
       <div class="form-group">
         <label>Référence *</label>
-        <input formControlName="reference" placeholder="BIEN-001">
-        <span class="error" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
-          Requis
-        </span>
+        <input formControlName="reference" placeholder="BIEN-001" [ngClass]="{'invalid-input': form.get('reference')?.invalid && form.get('reference')?.touched}">
+        <small class="error-text" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
+          La référence est requise.
+        </small>
       </div>
       <div class="form-group">
         <label>Type *</label>
         <select formControlName="type">
-          <option value="appartement">Appartement</option>
-          <option value="maison">Maison</option>
-          <option value="terrain">Terrain</option>
-          <option value="immeuble">Immeuble</option>
-          <option value="bureau">Bureau</option>
-          <option value="commerce">Commerce</option>
+          <option value="APPARTEMENT">Appartement</option>
+          <option value="MAISON">Maison</option>
+          <option value="TERRAIN">Terrain</option>
+          <option value="IMMEUBLE">Immeuble</option>
+          <option value="STUDIO">Studio</option>
         </select>
       </div>
     </div>
@@ -30,26 +29,34 @@
     <div class="form-row">
       <div class="form-group">
         <label>Adresse *</label>
-        <input formControlName="adresse" placeholder="123 Rue...">
+        <input formControlName="adresse" placeholder="123 Rue..." [ngClass]="{'invalid-input': form.get('adresse')?.invalid && form.get('adresse')?.touched}">
+        <small class="error-text" *ngIf="form.get('adresse')?.invalid && form.get('adresse')?.touched">
+          L'adresse est requise.
+        </small>
       </div>
       <div class="form-group">
         <label>Ville *</label>
-        <input formControlName="ville" placeholder="Dakar">
+        <input formControlName="ville" placeholder="Dakar" [ngClass]="{'invalid-input': form.get('ville')?.invalid && form.get('ville')?.touched}">
+        <small class="error-text" *ngIf="form.get('ville')?.invalid && form.get('ville')?.touched">
+          La ville est requise.
+        </small>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label>Surface (m²) *</label>
-        <input type="number" formControlName="surface">
+        <input type="number" formControlName="surface" [ngClass]="{'invalid-input': form.get('surface')?.invalid && form.get('surface')?.touched}">
+        <small class="error-text" *ngIf="form.get('surface')?.invalid && form.get('surface')?.touched">
+          La surface est requise et doit être > 0.
+        </small>
       </div>
       <div class="form-group">
         <label>Loyer mensuel (FCFA) *</label>
-        <input type="number" formControlName="loyer_mensuel">
-      </div>
-      <div class="form-group">
-        <label>Charges (FCFA)</label>
-        <input type="number" formControlName="charges">
+        <input type="number" formControlName="loyer_mensuel" [ngClass]="{'invalid-input': form.get('loyer_mensuel')?.invalid && form.get('loyer_mensuel')?.touched}">
+        <small class="error-text" *ngIf="form.get('loyer_mensuel')?.invalid && form.get('loyer_mensuel')?.touched">
+          Le loyer est requis et doit être > 0.
+        </small>
       </div>
     </div>
 
@@ -57,20 +64,22 @@
       <div class="form-group">
         <label>Statut *</label>
         <select formControlName="statut">
-          <option value="libre">Libre</option>
-          <option value="occupe">Occupé</option>
-          <option value="reserve">Réservé</option>
-          <option value="travaux">En travaux</option>
+          <option value="LIBRE">Libre</option>
+          <option value="OCCUPE">Occupé</option>
+          <option value="RESERVE">Réservé</option>
         </select>
       </div>
       <div class="form-group">
         <label>Propriétaire *</label>
-        <select formControlName="id_proprietaire">
+        <select formControlName="id_proprietaire" [ngClass]="{'invalid-input': form.get('id_proprietaire')?.invalid && form.get('id_proprietaire')?.touched}">
           <option [value]="null">-- Sélectionner --</option>
-          <option *ngFor="let p of proprietaires" [value]="p.id">
+          <option *ngFor="let p of proprietaires" [value]="p.id_proprietaire || p.id">
             {{ p.nom }} {{ p.prenom }}
           </option>
         </select>
+        <small class="error-text" *ngIf="form.get('id_proprietaire')?.invalid && form.get('id_proprietaire')?.touched">
+          Sélectionnez un propriétaire.
+        </small>
       </div>
     </div>
 

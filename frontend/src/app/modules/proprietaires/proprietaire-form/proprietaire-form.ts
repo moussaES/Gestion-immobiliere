@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ProprietaireService } from '../../../core/services/proprietaire.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-proprietaire-form',
@@ -24,6 +25,7 @@ export class ProprietaireFormComponent implements OnInit {
     private propSvc: ProprietaireService,
     private route:   ActivatedRoute,
     private router:  Router,
+    private toastSvc: ToastService
   ) {
     this.form = this.fb.group({
       nom:       ['', Validators.required],
@@ -73,8 +75,15 @@ export class ProprietaireFormComponent implements OnInit {
       : this.propSvc.create(this.form.value);
 
     action.subscribe({
-      next:  ()    => this.router.navigate(['/proprietaires']),
-      error: (err: any) => { this.erreur = err.message || 'Une erreur est survenue'; this.loading = false; },
+      next:  () => {
+        this.toastSvc.success(this.isEdit ? 'Propriétaire modifié avec succès' : 'Propriétaire créé avec succès');
+        this.router.navigate(['/proprietaires']);
+      },
+      error: (err: any) => { 
+        this.erreur = err.message || 'Une erreur est survenue'; 
+        this.toastSvc.error(this.erreur);
+        this.loading = false; 
+      },
     });
   }
 }

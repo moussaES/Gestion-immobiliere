@@ -1,0 +1,63 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Mes Documents et Reçus</h2>
+  </div>
+
+  <div class="filter-bar" style="display: flex; gap: 20px; margin-bottom: 20px; align-items: center;">
+    <div class="search-input" style="position: relative; display: flex; align-items: center; background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 6px 12px; width: 300px;">
+      <i class="fas fa-search" style="color: #1a237e; margin-right: 8px; font-size: 14px;"></i>
+      <input type="text" placeholder="Rechercher (référence, nom)..." [(ngModel)]="searchTerm" (input)="filterData()" style="border: none; outline: none; flex: 1; font-size: 14px;">
+    </div>
+    <div class="filters" style="display: flex; align-items: center; gap: 12px; font-size: 13px; color: #555;">
+      <label>Type</label>
+      <select [(ngModel)]="typeFilter" (change)="filterData()" style="border: 1px solid #ddd; padding: 4px 8px; border-radius: 4px; outline: none; background: #fff;">
+        <option value="">Tous</option>
+        <option value="CONTRAT">Contrat</option>
+        <option value="RECU_PAIEMENT">Reçu de paiement</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
+
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Type</th>
+          <th>Locataire</th>
+          <th>Propriétaire</th>
+          <th>Bien</th>
+          <th>Date de Création</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="loading">
+          <td colspan="7" class="text-center">Chargement des documents...</td>
+        </tr>
+        <tr *ngIf="!loading && filteredDocuments.length === 0">
+          <td colspan="7" class="text-center">Aucun document trouvé.</td>
+        </tr>
+        <tr *ngFor="let doc of filteredDocuments">
+          <td>{{ doc.reference }}</td>
+          <td>
+            <span class="badge" [ngClass]="{'badge-success': doc.type === 'RECU_PAIEMENT'}">
+              {{ doc.type }}
+            </span>
+          </td>
+          <td>{{ doc.locataire ? doc.locataire.prenom + ' ' + doc.locataire.nom : '-' }}</td>
+          <td>{{ doc.proprietaire ? doc.proprietaire.prenom + ' ' + doc.proprietaire.nom : '-' }}</td>
+          <td>{{ doc.bien ? doc.bien.reference : '-' }}</td>
+          <td>{{ doc.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-primary" (click)="telecharger(doc.id_document)">
+              Télécharger PDF
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

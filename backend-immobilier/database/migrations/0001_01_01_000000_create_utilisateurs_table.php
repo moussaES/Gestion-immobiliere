@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('prenom', 100);
             $table->string('email', 150)->unique();
             $table->string('password');
-            $table->enum('role', ['ADMIN', 'GESTIONNAIRE', 'COMPTABLE'])->default('GESTIONNAIRE');
+            $table->enum('role', ['ADMIN', 'GESTIONNAIRE'])->default('GESTIONNAIRE');
             $table->enum('statut', ['ACTIF', 'INACTIF'])->default('ACTIF');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

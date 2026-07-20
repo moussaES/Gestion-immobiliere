@@ -2,7 +2,7 @@ export type ModePaiement   = 'especes' | 'virement' | 'cheque' | 'wave' | 'orang
 export type StatutPaiement = 'paye' | 'partiel' | 'en_attente' | 'retard';
 
 export interface Paiement {
-  id?:              number;
+  id_paiement?:     number;
   reference:        string;
   date_paiement:    string;
   montant:          number;

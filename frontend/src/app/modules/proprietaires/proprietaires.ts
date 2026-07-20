@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { ProprietaireService } from '../../core/services/proprietaire.service';
 import { Proprietaire } from '../../core/models';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-proprietaires',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="page-container">
       <div class="list-header">
@@ -25,10 +27,10 @@ import { RouterModule } from '@angular/router';
             <option>Tout</option>
           </select>
           <label>Taille</label>
-          <select>
-            <option>5</option>
-            <option>10</option>
-            <option>20</option>
+          <select [(ngModel)]="pageSize" (change)="currentPage = 1">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
           </select>
         </div>
       </div>
@@ -46,7 +48,7 @@ import { RouterModule } from '@angular/router';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let prop of proprietaires">
+            <tr *ngFor="let prop of proprietaires | slice:(currentPage-1)*pageSize : currentPage*pageSize">
               <td>
                 <div class="primary-text">{{ prop.nom }} {{ prop.prenom }}</div>
                 <div class="secondary-text">{{ prop.telephone }}</div>
@@ -56,8 +58,8 @@ import { RouterModule } from '@angular/router';
               <td>{{ prop.email }}</td>
               <td><span class="badge badge-actif">{{ prop.biens_count || 0 }}</span></td>
               <td class="actions">
-                <a [routerLink]="['/proprietaires', prop.id]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
-                <a [routerLink]="['/proprietaires/modifier', prop.id]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
+                <a [routerLink]="['/proprietaires', $any(prop).id_proprietaire]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
+                <a [routerLink]="['/proprietaires/modifier', $any(prop).id_proprietaire]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
               </td>
             </tr>
             <tr *ngIf="proprietaires.length === 0">
@@ -65,6 +67,12 @@ import { RouterModule } from '@angular/router';
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="pagination-controls" *ngIf="proprietaires.length > pageSize">
+        <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">&laquo;</button>
+        <button *ngFor="let p of pages" [class.active]="p === currentPage" (click)="currentPage = p">{{ p }}</button>
+        <button [disabled]="currentPage === pages.length" (click)="currentPage = currentPage + 1">&raquo;</button>
       </div>
     </div>
   `,
@@ -109,12 +117,28 @@ import { RouterModule } from '@angular/router';
     .edit-btn:hover { background: rgba(245, 124, 0, 0.1); }
     
     .empty-state { text-align: center; color: #999; padding: 40px !important; }
+    
+    .pagination-controls { display: flex; justify-content: flex-end; gap: 4px; margin-top: 16px; align-items: center; }
+    .pagination-controls button { padding: 6px 12px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; color: #1a237e; font-weight: 600; font-size: 13px; transition: all 0.2s; }
+    .pagination-controls button:hover:not([disabled]) { background: #f4f6f9; }
+    .pagination-controls button.active { background: #1a237e; color: #fff; border-color: #1a237e; }
+    .pagination-controls button[disabled] { color: #ccc; cursor: not-allowed; border-color: #eee; }
   `]
 })
 export class ProprietairesComponent implements OnInit {
   proprietaires: Proprietaire[] = [];
+  pageSize: number = 5;
+  currentPage: number = 1;
 
-  constructor(private propSvc: ProprietaireService) {}
+  get pages(): number[] {
+    const total = Math.ceil(this.proprietaires.length / this.pageSize);
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  constructor(
+    private propSvc: ProprietaireService,
+    private toastSvc: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.chargerProprietaires();
@@ -123,14 +147,27 @@ export class ProprietairesComponent implements OnInit {
   chargerProprietaires(): void {
     this.propSvc.getAll().subscribe({
       next: (res: any) => {
-        this.proprietaires = res.data.data || res.data;
+        this.proprietaires = res.data?.data ? res.data.data : (res.data || []);
+      },
+      error: (err) => {
+        console.error('Erreur', err);
+        this.toastSvc.error('Impossible de charger la liste des propriétaires');
       }
     });
   }
 
   supprimer(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce propriétaire ?')) {
-      this.propSvc.delete(id).subscribe(() => this.chargerProprietaires());
+      this.propSvc.delete(id).subscribe({
+        next: () => {
+          this.toastSvc.success('Propriétaire supprimé avec succès');
+          this.chargerProprietaires();
+        },
+        error: (err) => {
+          console.error('Erreur', err);
+          this.toastSvc.error('Erreur lors de la suppression');
+        }
+      });
     }
   }
 }

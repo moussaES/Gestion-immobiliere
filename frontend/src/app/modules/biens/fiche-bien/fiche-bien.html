@@ -23,6 +23,15 @@
         <div class="kpi-value">{{ bien.loyer_mensuel }} FCFA</div>
         <div class="kpi-label">Loyer Estimé</div>
       </div>
+      <div class="kpi-item" style="background-color: #e3f2fd; border: 1px solid #bbdefb;">
+        <div class="kpi-value" style="color: #1565c0; font-size: 16px;">
+          Attendu : {{ totalAttendu }} FCFA<br>
+          Reçu : {{ totalRecu }} FCFA
+        </div>
+        <div class="kpi-label" style="color: #1976d2; font-weight: bold; text-transform: uppercase;">
+          {{ moisConcerne }}
+        </div>
+      </div>
     </div>
   </div>
 
@@ -36,6 +45,9 @@
       </button>
       <button [class.active]="activeTab === 'interventions'" (click)="activeTab = 'interventions'">
         Interventions
+      </button>
+      <button [class.active]="activeTab === 'paiements'" (click)="activeTab = 'paiements'">
+        Paiements ({{ paiements.length }})
       </button>
       <button [class.active]="activeTab === 'documents'" (click)="activeTab = 'documents'">
         Documents
@@ -89,7 +101,7 @@
         </div>
 
         <div *ngIf="editMode">
-          <app-bien-form [bienId]="bien.id!" [isEmbedded]="true"></app-bien-form>
+          <app-bien-form [bienId]="$any(bien).id_bien!" [isEmbedded]="true"></app-bien-form>
         </div>
       </div>
 
@@ -128,8 +140,95 @@
         <p class="empty-state"><i class="fas fa-hammer fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Interventions et Travaux à venir.</p>
       </div>
 
+      <!-- Onglet Paiements -->
+      <div *ngIf="activeTab === 'paiements'" class="tab-pane">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Contrat</th>
+                <th>Mois/Année</th>
+                <th>Montant</th>
+                <th>Mode</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of paiements">
+                <td>{{ p.date_paiement }}</td>
+                <td>Contrat #{{ p.id_contrat }}</td>
+                <td>{{ p.date_paiement | date:'MM/yyyy' }}</td>
+                <td>{{ p.montant }} FCFA</td>
+                <td>{{ p.mode }}</td>
+                <td><span class="badge" [ngClass]="p.statut === 'paye' ? 'badge-actif' : 'badge-inactif'">{{ p.statut }}</span></td>
+              </tr>
+              <tr *ngIf="paiements.length === 0">
+                <td colspan="6" class="empty-state">Aucun paiement enregistré pour ce bien.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Onglet Historique -->
+      <div *ngIf="activeTab === 'historique'" class="tab-pane">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Action</th>
+                <th>Utilisateur</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let h of historique">
+                <td>{{ h.date_operation | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td><span class="badge" [ngClass]="'badge-' + h.type_operation.toLowerCase()">{{ h.type_operation }}</span></td>
+                <td>{{ h.utilisateur?.prenom }} {{ h.utilisateur?.nom }}</td>
+                <td>{{ h.description || h.entite + ' ' + h.type_operation }}</td>
+              </tr>
+              <tr *ngIf="historique.length === 0">
+                <td colspan="4" class="empty-state">Aucun historique disponible.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Onglet Documents -->
       <div *ngIf="activeTab === 'documents'" class="tab-pane">
-        <p class="empty-state"><i class="fas fa-file-pdf fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Gestion des documents à venir.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Nom du fichier</th>
+                <th>Taille</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let doc of documents">
+                <td>{{ doc.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td><span class="badge badge-info">{{ doc.type_document }}</span></td>
+                <td>{{ doc.nom_fichier }}</td>
+                <td>{{ doc.taille ? (doc.taille / 1024 | number:'1.0-0') + ' KB' : 'N/A' }}</td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" (click)="downloadDocument(doc)">
+                    <i class="fas fa-download"></i> Télécharger
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="documents.length === 0">
+                <td colspan="5" class="empty-state">Aucun document disponible pour ce bien.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LocataireService } from '../../../core/services/locataire.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-locataire-form',
@@ -24,6 +25,7 @@ export class LocataireFormComponent implements OnInit {
     private locSvc:   LocataireService,
     private route:    ActivatedRoute,
     private router:   Router,
+    private toastSvc: ToastService
   ) {
     this.form = this.fb.group({
       nom:        ['', Validators.required],
@@ -74,8 +76,15 @@ export class LocataireFormComponent implements OnInit {
       : this.locSvc.create(this.form.value);
 
     action.subscribe({
-      next:  ()    => this.router.navigate(['/locataires']),
-      error: (err: any) => { this.erreur = err.message || 'Une erreur est survenue'; this.loading = false; },
+      next:  () => {
+        this.toastSvc.success(this.isEdit ? 'Locataire modifié avec succès' : 'Locataire créé avec succès');
+        this.router.navigate(['/locataires']);
+      },
+      error: (err: any) => { 
+        this.erreur = err.message || 'Une erreur est survenue'; 
+        this.toastSvc.error(this.erreur);
+        this.loading = false; 
+      },
     });
   }
 }

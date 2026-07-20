@@ -166,6 +166,29 @@ class HistoriqueOperationController extends Controller
     }
 
     /**
+     * Récupérer l'historique par entité et id
+     */
+    public function byEntiteAndId($entite, $id)
+    {
+        try {
+            $historiques = HistoriqueOperation::where('entite', $entite)
+                ->where('id_entite', $id)
+                ->orderBy('date_operation', 'desc')
+                ->get();
+            return response()->json([
+                'success' => true,
+                'data' => $historiques,
+                'message' => "Historique de {$entite} #{$id} récupéré"
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Récupérer l'historique récent (7 derniers jours)
      */
     public function recent($jours = 7)

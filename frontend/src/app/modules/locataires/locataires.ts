@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../core/services/toast.service';
 import { LocataireService } from '../../core/services/locataire.service';
 import { Locataire } from '../../core/models';
 
 @Component({
   selector: 'app-locataires',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="page-container">
       <div class="list-header">
@@ -25,10 +27,10 @@ import { Locataire } from '../../core/models';
             <option>Tout</option>
           </select>
           <label>Taille</label>
-          <select>
-            <option>5</option>
-            <option>10</option>
-            <option>20</option>
+          <select [(ngModel)]="pageSize" (change)="currentPage = 1">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
           </select>
         </div>
       </div>
@@ -46,7 +48,7 @@ import { Locataire } from '../../core/models';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let loc of locataires">
+            <tr *ngFor="let loc of locataires | slice:(currentPage-1)*pageSize : currentPage*pageSize">
               <td>
                 <div class="primary-text">{{ loc.nom }} {{ loc.prenom }}</div>
                 <div class="secondary-text">{{ loc.telephone }}</div>
@@ -56,8 +58,8 @@ import { Locataire } from '../../core/models';
               <td>{{ loc.email }}</td>
               <td><span class="badge badge-actif">Actif</span></td>
               <td class="actions">
-                <a [routerLink]="['/locataires', loc.id]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
-                <a [routerLink]="['/locataires/modifier', loc.id]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
+                <a [routerLink]="['/locataires', $any(loc).id_locataire]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
+                <a [routerLink]="['/locataires/modifier', $any(loc).id_locataire]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
               </td>
             </tr>
             <tr *ngIf="locataires.length === 0">
@@ -65,6 +67,12 @@ import { Locataire } from '../../core/models';
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="pagination-controls" *ngIf="locataires.length > pageSize">
+        <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">&laquo;</button>
+        <button *ngFor="let p of pages" [class.active]="p === currentPage" (click)="currentPage = p">{{ p }}</button>
+        <button [disabled]="currentPage === pages.length" (click)="currentPage = currentPage + 1">&raquo;</button>
       </div>
     </div>
   `,
@@ -109,12 +117,28 @@ import { Locataire } from '../../core/models';
     .edit-btn:hover { background: rgba(245, 124, 0, 0.1); }
     
     .empty-state { text-align: center; color: #999; padding: 40px !important; }
+    
+    .pagination-controls { display: flex; justify-content: flex-end; gap: 4px; margin-top: 16px; align-items: center; }
+    .pagination-controls button { padding: 6px 12px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; color: #1a237e; font-weight: 600; font-size: 13px; transition: all 0.2s; }
+    .pagination-controls button:hover:not([disabled]) { background: #f4f6f9; }
+    .pagination-controls button.active { background: #1a237e; color: #fff; border-color: #1a237e; }
+    .pagination-controls button[disabled] { color: #ccc; cursor: not-allowed; border-color: #eee; }
   `]
 })
 export class LocatairesComponent implements OnInit {
   locataires: Locataire[] = [];
+  pageSize: number = 5;
+  currentPage: number = 1;
 
-  constructor(private locSvc: LocataireService) {}
+  get pages(): number[] {
+    const total = Math.ceil(this.locataires.length / this.pageSize);
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  constructor(
+    private locSvc: LocataireService,
+    private toastSvc: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.chargerLocataires();
@@ -123,14 +147,27 @@ export class LocatairesComponent implements OnInit {
   chargerLocataires(): void {
     this.locSvc.getAll().subscribe({
       next: (res: any) => {
-        this.locataires = res.data.data || res.data;
+        this.locataires = res.data?.data ? res.data.data : (res.data || []);
+      },
+      error: (err) => {
+        console.error('Erreur', err);
+        this.toastSvc.error('Impossible de charger la liste des locataires');
       }
     });
   }
 
   supprimer(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce locataire ?')) {
-      this.locSvc.delete(id).subscribe(() => this.chargerLocataires());
+      this.locSvc.delete(id).subscribe({
+        next: () => {
+          this.toastSvc.success('Locataire supprimé avec succès');
+          this.chargerLocataires();
+        },
+        error: (err) => {
+          console.error('Erreur', err);
+          this.toastSvc.error('Erreur lors de la suppression');
+        }
+      });
     }
   }
 }

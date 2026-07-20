@@ -5,4 +5,6 @@ export * from './bien.model';
 export * from './contrat.model';
 export * from './paiement.model';
 export * from './historique.model';
+export * from './document.model';
+export * from './travail.model';
 export * from './api-response.model';

@@ -9,16 +9,16 @@
     <div class="form-row">
       <div class="form-group">
         <label>Référence *</label>
-        <input formControlName="reference" placeholder="CTR-001">
-        <span class="error" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
-          Requis
-        </span>
+        <input formControlName="reference" placeholder="CTR-001" [ngClass]="{'invalid-input': form.get('reference')?.invalid && form.get('reference')?.touched}">
+        <small class="error-text" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
+          La référence est requise.
+        </small>
       </div>
       <div class="form-group">
         <label>Type *</label>
-        <select formControlName="type">
-          <option value="location">Location</option>
-          <option value="gestion">Gestion</option>
+        <select formControlName="type_contrat">
+          <option value="LOCATAIRE">Locataire</option>
+          <option value="PROPRIETAIRE">Propriétaire</option>
         </select>
       </div>
     </div>
@@ -26,28 +26,31 @@
     <div class="form-row">
       <div class="form-group">
         <label>Date de début *</label>
-        <input type="date" formControlName="date_debut">
-        <span class="error" *ngIf="form.get('date_debut')?.invalid && form.get('date_debut')?.touched">
-          Requis
-        </span>
+        <input type="date" formControlName="date_debut" [ngClass]="{'invalid-input': form.get('date_debut')?.invalid && form.get('date_debut')?.touched}">
+        <small class="error-text" *ngIf="form.get('date_debut')?.invalid && form.get('date_debut')?.touched">
+          La date de début est requise.
+        </small>
       </div>
       <div class="form-group">
         <label>Date de fin *</label>
-        <input type="date" formControlName="date_fin">
-        <span class="error" *ngIf="form.get('date_fin')?.invalid && form.get('date_fin')?.touched">
-          Requis
-        </span>
+        <input type="date" formControlName="date_fin" [ngClass]="{'invalid-input': form.get('date_fin')?.invalid && form.get('date_fin')?.touched}">
+        <small class="error-text" *ngIf="form.get('date_fin')?.invalid && form.get('date_fin')?.touched">
+          La date de fin est requise.
+        </small>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label>Montant (FCFA) *</label>
-        <input type="number" formControlName="montant">
+        <input type="number" formControlName="montant" [ngClass]="{'invalid-input': form.get('montant')?.invalid && form.get('montant')?.touched}">
+        <small class="error-text" *ngIf="form.get('montant')?.invalid && form.get('montant')?.touched">
+          Le montant est requis et doit être > 0.
+        </small>
       </div>
       <div class="form-group">
-        <label>Dépôt de garantie (FCFA) *</label>
-        <input type="number" formControlName="depot_garantie">
+        <label>Notes</label>
+        <textarea formControlName="notes" rows="2"></textarea>
       </div>
     </div>
 
@@ -55,35 +58,40 @@
       <div class="form-group">
         <label>Statut *</label>
         <select formControlName="statut">
-          <option value="actif">Actif</option>
-          <option value="resilie">Résilié</option>
-          <option value="expire">Expiré</option>
-          <option value="archive">Archivé</option>
+          <option value="ACTIF">Actif</option>
+          <option value="RESILIE">Résilié</option>
+          <option value="ARCHIVE">Archivé</option>
         </select>
       </div>
       <div class="form-group">
         <label>Bien *</label>
-        <select formControlName="id_bien">
+        <select formControlName="id_bien" [ngClass]="{'invalid-input': form.get('id_bien')?.invalid && form.get('id_bien')?.touched}">
           <option [value]="null">-- Sélectionner un bien --</option>
-          <option *ngFor="let b of biens" [value]="b.id">{{ b.reference }} - {{ b.adresse }}</option>
+          <option *ngFor="let b of biens" [value]="b.id_bien">{{ b.reference }} - {{ b.adresse }}</option>
         </select>
+        <small class="error-text" *ngIf="form.get('id_bien')?.invalid && form.get('id_bien')?.touched">
+          Un bien est requis.
+        </small>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label>Locataire *</label>
-        <select formControlName="id_locataire">
+        <select formControlName="id_locataire" [ngClass]="{'invalid-input': form.get('id_locataire')?.invalid && form.get('id_locataire')?.touched}">
           <option [value]="null">-- Sélectionner un locataire --</option>
-          <option *ngFor="let l of locataires" [value]="l.id">{{ l.nom }} {{ l.prenom }}</option>
+          <option *ngFor="let l of locataires" [value]="l.id_locataire">{{ l.nom }} {{ l.prenom }}</option>
         </select>
       </div>
       <div class="form-group">
         <label>Propriétaire *</label>
-        <select formControlName="id_proprietaire">
+        <select formControlName="id_proprietaire" [ngClass]="{'invalid-input': form.get('id_proprietaire')?.invalid && form.get('id_proprietaire')?.touched}">
           <option [value]="null">-- Sélectionner un propriétaire --</option>
-          <option *ngFor="let p of proprietaires" [value]="p.id">{{ p.nom }} {{ p.prenom }}</option>
+          <option *ngFor="let p of proprietaires" [value]="p.id_proprietaire">{{ p.nom }} {{ p.prenom }}</option>
         </select>
+        <small class="error-text" *ngIf="form.get('id_proprietaire')?.invalid && form.get('id_proprietaire')?.touched">
+          Un propriétaire est requis.
+        </small>
       </div>
     </div>
 

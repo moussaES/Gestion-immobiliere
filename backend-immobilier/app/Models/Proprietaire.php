@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Proprietaire extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\LogsHistorique;
 
     protected $table = 'proprietaires';
     protected $primaryKey = 'id_proprietaire';

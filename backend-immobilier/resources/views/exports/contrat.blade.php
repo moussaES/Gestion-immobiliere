@@ -77,7 +77,14 @@
 <body>
 
     <div class="header">
-        <div class="header-logo">★ E S</div>
+        <?php
+            $logoPath = 'C:/xampp/htdocs/Gestion-immobiliere/frontend/src/assets/logo.jpeg';
+            if (file_exists($logoPath)) {
+                $logoData = base64_encode(file_get_contents($logoPath));
+                $logoSrc = 'data:image/jpeg;base64,' . $logoData;
+                echo '<img src="' . $logoSrc . '" alt="Logo" style="height: 60px;">';
+            }
+        ?>
         <h2>AGENCE IMMOBILIERE LES ETOILES DU SINE</h2>
         <p style="margin:2px; font-size:11px;">Tivaoune peulh citée apix TEL / 782021500 / 752588820</p>
         <h3>ACHAT-VENTE -LOCATION -GERENCE DE MAISON -BATIMENT-TERRASSEMENT -VIABILISATION -BTP</h3>

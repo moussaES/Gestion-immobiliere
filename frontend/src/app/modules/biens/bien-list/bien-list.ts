@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { BienService } from '../../../core/services/bien.service';
 import { Bien } from '../../../core/models';
 
 @Component({
   selector: 'app-bien-list',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <div class="page-container">
       <div class="list-header">
@@ -25,10 +26,10 @@ import { Bien } from '../../../core/models';
             <option>Tout</option>
           </select>
           <label>Taille</label>
-          <select>
-            <option>5</option>
-            <option>10</option>
-            <option>20</option>
+          <select [(ngModel)]="pageSize" (change)="currentPage = 1">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
           </select>
         </div>
       </div>
@@ -47,7 +48,7 @@ import { Bien } from '../../../core/models';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let bien of biens">
+            <tr *ngFor="let bien of biens | slice:(currentPage-1)*pageSize : currentPage*pageSize">
               <td><div class="primary-text">{{ bien.reference }}</div></td>
               <td>{{ bien.type | uppercase }}</td>
               <td>
@@ -65,8 +66,8 @@ import { Bien } from '../../../core/models';
               </td>
               <td><span class="badge" [ngClass]="getBadgeClass(bien.statut)">{{ bien.statut }}</span></td>
               <td class="actions">
-                <a [routerLink]="['/biens', bien.id]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
-                <a [routerLink]="['/biens/modifier', bien.id]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
+                <a [routerLink]="['/biens', $any(bien).id_bien]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
+                <a [routerLink]="['/biens/modifier', $any(bien).id_bien]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
               </td>
             </tr>
             <tr *ngIf="biens.length === 0">
@@ -74,6 +75,12 @@ import { Bien } from '../../../core/models';
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="pagination-controls" *ngIf="biens.length > pageSize">
+        <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">&laquo;</button>
+        <button *ngFor="let p of pages" [class.active]="p === currentPage" (click)="currentPage = p">{{ p }}</button>
+        <button [disabled]="currentPage === pages.length" (click)="currentPage = currentPage + 1">&raquo;</button>
       </div>
     </div>
   `,
@@ -121,10 +128,23 @@ import { Bien } from '../../../core/models';
     .edit-btn:hover { background: rgba(245, 124, 0, 0.1); }
     
     .empty-state { text-align: center; color: #999; padding: 40px !important; }
+    
+    .pagination-controls { display: flex; justify-content: flex-end; gap: 4px; margin-top: 16px; align-items: center; }
+    .pagination-controls button { padding: 6px 12px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; color: #1a237e; font-weight: 600; font-size: 13px; transition: all 0.2s; }
+    .pagination-controls button:hover:not([disabled]) { background: #f4f6f9; }
+    .pagination-controls button.active { background: #1a237e; color: #fff; border-color: #1a237e; }
+    .pagination-controls button[disabled] { color: #ccc; cursor: not-allowed; border-color: #eee; }
   `]
 })
 export class BienListComponent implements OnInit {
   biens: Bien[] = [];
+  pageSize: number = 5;
+  currentPage: number = 1;
+
+  get pages(): number[] {
+    const total = Math.ceil(this.biens.length / this.pageSize);
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
 
   constructor(private bienSvc: BienService) {}
 

@@ -1,13 +1,14 @@
-export type Role = 'ADMIN' | 'GESTIONNAIRE' | 'COMPTABLE';
+export type Role = 'ADMIN' | 'GESTIONNAIRE';
 
 export interface Utilisateur {
-  id?:           number;
+  id_user?:      number;
   nom:           string;
   prenom:        string;
   email:         string;
   password?:     string;
   role:          Role;
-  statut:        'actif' | 'inactif';
+  statut:        'ACTIF' | 'INACTIF' | 'actif' | 'inactif';
+  derniere_connexion?: string;
   date_creation?: string;
 }
 

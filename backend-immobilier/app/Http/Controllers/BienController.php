@@ -3,75 +3,51 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bien;
+use App\Http\Requests\StoreBienRequest;
+use App\Http\Requests\UpdateBienRequest;
+use App\Http\Resources\BienResource;
 use Illuminate\Http\Request;
 
 class BienController extends Controller
 {
-    /**
-     * Afficher la liste de tous les biens
-     */
     public function index()
     {
         try {
-            $biens = Bien::with('proprietaire', 'contrats')->get();
+            $biens = Bien::with('proprietaire', 'contrats')->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $biens,
+                'data' => BienResource::collection($biens)->response()->getData(true),
                 'message' => 'Liste des biens récupérée avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            \Log::error('Erreur dans BienController@index : ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Afficher un bien spécifique
-     */
     public function show($id)
     {
         try {
             $bien = Bien::with('proprietaire', 'contrats')->findOrFail($id);
             return response()->json([
                 'success' => true,
-                'data' => $bien,
+                'data' => new BienResource($bien),
                 'message' => 'Bien récupéré avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bien non trouvé'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Bien non trouvé'], 404);
         }
     }
 
-    /**
-     * Créer un nouveau bien
-     */
-    public function store(Request $request)
+    public function store(StoreBienRequest $request)
     {
         try {
-            $validated = $request->validate([
-                'reference' => 'required|string|unique:biens|max:50',
-                'type' => 'required|in:MAISON,APPARTEMENT,IMMEUBLE,TERRAIN',
-                'adresse' => 'required|string|max:255',
-                'ville' => 'required|string|max:100',
-                'code_postal' => 'sometimes|string|max:10',
-                'surface' => 'sometimes|numeric|min:0',
-                'nombre_pieces' => 'sometimes|integer|min:0',
-                'loyer_mensuel' => 'required|numeric|min:0',
-                'statut' => 'sometimes|in:OCCUPE,LIBRE,RESERVE',
-                'description' => 'sometimes|string',
-                'id_proprietaire' => 'required|exists:proprietaires,id_proprietaire',
-            ]);
-
+            $validated = $request->validated();
             $bien = Bien::create($validated);
 
             return response()->json([
                 'success' => true,
-                'data' => $bien,
+                'data' => new BienResource($bien),
                 'message' => 'Bien créé avec succès'
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -81,134 +57,89 @@ class BienController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            \Log::error('Erreur dans BienController@store : ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Mettre à jour un bien
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateBienRequest $request, $id)
     {
         try {
             $bien = Bien::findOrFail($id);
-
-            $validated = $request->validate([
-                'reference' => 'sometimes|string|unique:biens,reference,' . $id . ',id_bien|max:50',
-                'type' => 'sometimes|in:MAISON,APPARTEMENT,IMMEUBLE,TERRAIN',
-                'adresse' => 'sometimes|string|max:255',
-                'ville' => 'sometimes|string|max:100',
-                'code_postal' => 'sometimes|string|max:10',
-                'surface' => 'sometimes|numeric|min:0',
-                'nombre_pieces' => 'sometimes|integer|min:0',
-                'loyer_mensuel' => 'sometimes|numeric|min:0',
-                'statut' => 'sometimes|in:OCCUPE,LIBRE,RESERVE',
-                'description' => 'sometimes|string',
-                'id_proprietaire' => 'sometimes|exists:proprietaires,id_proprietaire',
-            ]);
-
+            $validated = $request->validated();
             $bien->update($validated);
 
             return response()->json([
                 'success' => true,
-                'data' => $bien,
+                'data' => new BienResource($bien),
                 'message' => 'Bien mis à jour avec succès'
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans BienController@update : ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Supprimer un bien
-     */
     public function destroy($id)
     {
         try {
             $bien = Bien::findOrFail($id);
             $bien->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Bien supprimé avec succès'
-            ]);
+            return response()->json(['success' => true, 'message' => 'Bien supprimé avec succès']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les biens par statut
-     */
     public function byStatut($statut)
     {
         try {
-            $biens = Bien::where('statut', $statut)->get();
+            $biens = Bien::where('statut', $statut)->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $biens,
+                'data' => BienResource::collection($biens)->response()->getData(true),
                 'message' => "Biens avec le statut {$statut} récupérés"
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les biens par type
-     */
     public function byType($type)
     {
         try {
-            $biens = Bien::where('type', $type)->get();
+            $biens = Bien::where('type', $type)->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $biens,
+                'data' => BienResource::collection($biens)->response()->getData(true),
                 'message' => "Biens de type {$type} récupérés"
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les biens par ville
-     */
     public function byVille($ville)
     {
         try {
-            $biens = Bien::where('ville', $ville)->get();
+            $biens = Bien::where('ville', $ville)->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $biens,
+                'data' => BienResource::collection($biens)->response()->getData(true),
                 'message' => "Biens de la ville {$ville} récupérés"
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les contrats d'un bien
-     */
     public function contrats($id)
     {
         try {
@@ -221,10 +152,7 @@ class BienController extends Controller
                 'message' => 'Contrats du bien récupérés avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

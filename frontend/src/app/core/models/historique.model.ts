@@ -1,7 +1,7 @@
 export type TypeOperation = 'INSERT' | 'UPDATE' | 'DELETE';
 
 export interface HistoriqueOperation {
-  id?:              number;
+  id_historique?:   number;
   id_utilisateur:   number;
   type_operation:   TypeOperation;
   entite:           string;

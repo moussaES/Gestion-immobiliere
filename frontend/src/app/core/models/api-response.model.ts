@@ -25,4 +25,9 @@ export interface DashboardStats {
   revenu_mensuel:      number;
   paiements_en_attente:number;
   taux_occupation:     number;
+  loyers_attendus:     number;
+  part_proprietaire_attendue: number;
+  revenus_agence_attendus:    number;
+  part_proprietaire_versee:   number;
+  revenus_agence_encaisses:   number;
 }

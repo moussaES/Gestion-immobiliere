@@ -1,121 +1,114 @@
 <div class="fiche-section">
-  <div class="back-btn" (click)="back()">
-    <!-- Utilisation de caractères ou icons si FontAwesome non dispo -->
-    &#8592; Retour aux Locataires
-  </div>
-
-  <div class="fiche-header" *ngIf="locataire">
-    <div class="header-info">
-      <div class="avatar">{{ locataire.nom.charAt(0).toUpperCase() }}</div>
-      <div>
-        <h2>{{ locataire.nom }} {{ locataire.prenom }}</h2>
-        <p class="contact-info">
-          <span>&#9742;</span> {{ locataire.telephone }} | 
-          <span>&#128188;</span> {{ locataire.profession }}
-        </p>
+  
+  <div class="banner-card" *ngIf="locataire">
+    <div class="banner-content">
+      <div class="banner-left">
+        <div class="avatar">{{ locataire.nom.charAt(0).toUpperCase() }}</div>
+        <div class="name-info">
+          <h2>{{ locataire.prenom }} {{ locataire.nom }}</h2>
+        </div>
+      </div>
+      
+      <div class="banner-center">
+        <div class="title">Paiements ({{ selectedMonth }} {{ selectedYear }})</div>
+        <div class="amount">{{ totalPaiementsMois | number }} FCFA</div>
+        <div class="subtitle">{{ countPaiementsMois }} paiement(s)</div>
+        <div class="sub-amount">{{ totalPaiementsAnnee | number }} FCFA payés en {{ selectedYear }}</div>
+      </div>
+      
+      <div class="banner-right">
+        <div class="filter-group">
+          <label>Mois</label>
+          <select [(ngModel)]="selectedMonth">
+            <option *ngFor="let m of months" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Année</label>
+          <select [(ngModel)]="selectedYear">
+            <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+          </select>
+        </div>
       </div>
     </div>
-    <div class="kpis">
-      <div class="kpi-item">
-        <div class="kpi-value">{{ contrats.length }}</div>
-        <div class="kpi-label">Contrats</div>
-      </div>
-      <div class="kpi-item">
-        <div class="kpi-value">{{ loyerMensuel }} FCFA</div>
-        <div class="kpi-label">Loyer Mensuel Actif</div>
-      </div>
+  </div>
+
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fas fa-file-contract"></i></div>
+      <div class="kpi-title">Contrats</div>
+      <div class="kpi-value">{{ contrats.length }}</div>
+      <div class="kpi-sub">{{ actifsContrats }} actifs • {{ annulesContrats }} annulés</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
+      <div class="kpi-title">Loyers mensuels</div>
+      <div class="kpi-value">{{ loyerMensuel | number }} FCFA</div>
+      <div class="kpi-sub">{{ actifsContrats }} contrat(s) actif(s)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+      <div class="kpi-title">Dernier paiement</div>
+      <div class="kpi-value">{{ dernierPaiement ? (dernierPaiement.date_paiement | date:'dd/MM/yy') : '--/--/--' }}</div>
+      <div class="kpi-sub" *ngIf="dernierPaiement">{{ dernierPaiement.montant | number }} FCFA • {{ dernierPaiement.mode_paiement || dernierPaiement.mode }}</div>
+      <div class="kpi-sub" *ngIf="!dernierPaiement">Aucun paiement</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fas fa-wrench"></i></div>
+      <div class="kpi-title">Travaux</div>
+      <div class="kpi-value">{{ totalTravaux | number }} FCFA</div>
+      <div class="kpi-sub">{{ travaux.length }} intervention(s)</div>
     </div>
   </div>
 
-  <div class="tabs">
+  <div class="tabs-container">
     <div class="tab-header">
-      <button [class.active]="activeTab === 'infos'" (click)="activeTab = 'infos'">
-        Informations
-      </button>
       <button [class.active]="activeTab === 'contrats'" (click)="activeTab = 'contrats'">
-        Contrats ({{ contrats.length }})
+        <i class="fas fa-file-alt"></i> Contrats
       </button>
       <button [class.active]="activeTab === 'biens'" (click)="activeTab = 'biens'">
-        Biens Loués
+        <i class="fas fa-home"></i> Biens loués
       </button>
       <button [class.active]="activeTab === 'paiements'" (click)="activeTab = 'paiements'">
-        Paiements
+        <i class="fas fa-file-invoice-dollar"></i> Paiements
       </button>
       <button [class.active]="activeTab === 'travaux'" (click)="activeTab = 'travaux'">
-        Travaux
+        <i class="fas fa-tools"></i> Travaux
       </button>
       <button [class.active]="activeTab === 'historique'" (click)="activeTab = 'historique'">
-        Historique
+        <i class="fas fa-history"></i> Historique
+      </button>
+      <button [class.active]="activeTab === 'infos'" (click)="activeTab = 'infos'">
+        <i class="fas fa-user"></i> Informations
       </button>
       <button [class.active]="activeTab === 'documents'" (click)="activeTab = 'documents'">
-        Documents
+        <i class="fas fa-folder-open"></i> Documents
       </button>
     </div>
 
     <div class="tab-content">
-      <!-- Onglet Informations (Formulaire d'édition) -->
-      <div *ngIf="activeTab === 'infos' && locataire" class="tab-pane">
-        <div class="list-header" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-          <button class="btn" [ngClass]="editMode ? 'btn-secondary' : 'btn-outline-primary'" (click)="toggleEditMode()">
-            <i class="fas" [ngClass]="editMode ? 'fa-times' : 'fa-pencil-alt'"></i>
-            {{ editMode ? 'Annuler la modification' : 'Modifier les informations' }}
-          </button>
-        </div>
-
-        <div *ngIf="!editMode" class="info-grid">
-          <div class="info-item">
-            <label>Nom & Prénom</label>
-            <p>{{ locataire.nom }} {{ locataire.prenom }}</p>
-          </div>
-          <div class="info-item">
-            <label>Téléphone</label>
-            <p>{{ locataire.telephone }}</p>
-          </div>
-          <div class="info-item">
-            <label>Email</label>
-            <p>{{ locataire.email }}</p>
-          </div>
-          <div class="info-item">
-            <label>Profession</label>
-            <p>{{ locataire.profession }}</p>
-          </div>
-          <div class="info-item">
-            <label>N° CNI</label>
-            <p>{{ locataire.cni }}</p>
-          </div>
-          <div class="info-item">
-            <label>Adresse actuelle</label>
-            <p>{{ locataire.adresse }}</p>
-          </div>
-        </div>
-
-        <div *ngIf="editMode">
-          <app-locataire-form [locId]="locataire.id!" [isEmbedded]="true"></app-locataire-form>
-        </div>
-      </div>
-
       <!-- Onglet Contrats -->
       <div *ngIf="activeTab === 'contrats'" class="tab-pane">
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>N° Contrat</th>
+                <th>N° contrat</th>
                 <th>Bien</th>
-                <th>Date Début</th>
-                <th>Date Fin</th>
-                <th>Loyer</th>
+                <th>Début</th>
+                <th>Fin</th>
                 <th>Statut</th>
+                <th>Loyer</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let contrat of contrats">
                 <td>{{ contrat.reference }}</td>
-                <td>{{ contrat.bien?.reference || 'Bien #'+contrat.id_bien }}</td>
-                <td>{{ contrat.date_debut }}</td>
-                <td>{{ contrat.date_fin }}</td>
-                <td>{{ contrat.montant }} FCFA</td>
+                <td><i class="fas fa-building" style="color: #999; margin-right: 8px;"></i>{{ contrat.bien?.reference || 'Bien #'+contrat.id_bien }}</td>
+                <td><i class="far fa-calendar-alt" style="color: #999; margin-right: 8px;"></i>{{ contrat.date_debut | date:'dd/MM/yyyy' }}</td>
+                <td>{{ contrat.date_fin | date:'dd/MM/yyyy' }}</td>
                 <td><span class="badge" [ngClass]="'badge-' + contrat.statut.toLowerCase()">{{ contrat.statut }}</span></td>
+                <td>{{ contrat.montant | number }} FCFA</td>
               </tr>
               <tr *ngIf="contrats.length === 0">
                 <td colspan="6" class="empty-state">Aucun contrat trouvé.</td>
@@ -170,12 +163,12 @@
             </thead>
             <tbody>
               <tr *ngFor="let p of paiements">
-                <td>{{ p.date_paiement }}</td>
+                <td>{{ p.date_paiement | date:'dd/MM/yyyy' }}</td>
                 <td>Contrat #{{ p.id_contrat }}</td>
-                <td>{{ p.mois_concerne }}</td>
-                <td>{{ p.montant }} FCFA</td>
-                <td>{{ p.mode }}</td>
-                <td><span class="badge" [ngClass]="p.statut === 'paye' ? 'badge-actif' : 'badge-inactif'">{{ p.statut }}</span></td>
+                <td>{{ p.date_paiement | date:'MM/yyyy' }}</td>
+                <td>{{ p.montant | number }} FCFA</td>
+                <td>{{ $any(p).mode_paiement || $any(p).mode }}</td>
+                <td><span class="badge" [ngClass]="isPaye($any(p).statut) ? 'badge-actif' : 'badge-inactif'">{{ p.statut }}</span></td>
               </tr>
               <tr *ngIf="paiements.length === 0">
                 <td colspan="6" class="empty-state">Aucun paiement enregistré.</td>
@@ -185,16 +178,130 @@
         </div>
       </div>
 
+      <!-- Onglet Travaux -->
       <div *ngIf="activeTab === 'travaux'" class="tab-pane">
-        <p class="empty-state"><i class="fas fa-tools fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Travaux & Réparations à venir.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Titre</th>
+                <th>Bien concerné</th>
+                <th>Montant</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of travaux">
+                <td>{{ t.date_intervention | date:'dd/MM/yyyy' }}</td>
+                <td>{{ t.titre }}</td>
+                <td><i class="fas fa-building" style="color: #999; margin-right: 8px;"></i>Bien #{{ t.id_bien }}</td>
+                <td>{{ t.montant | number }} FCFA</td>
+                <td><span class="badge" [ngClass]="'badge-' + t.statut.toLowerCase()">{{ t.statut }}</span></td>
+              </tr>
+              <tr *ngIf="travaux.length === 0">
+                <td colspan="5" class="empty-state">Aucun travail/intervention enregistré.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-
       <div *ngIf="activeTab === 'historique'" class="tab-pane">
-        <p class="empty-state"><i class="fas fa-history fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Historique des actions à venir.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Action</th>
+                <th>Utilisateur</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let h of historique">
+                <td>{{ h.date_operation | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td><span class="badge" [ngClass]="'badge-' + h.type_operation.toLowerCase()">{{ h.type_operation }}</span></td>
+                <td>{{ h.utilisateur?.prenom }} {{ h.utilisateur?.nom }}</td>
+                <td>{{ h.description || h.entite + ' ' + h.type_operation }}</td>
+              </tr>
+              <tr *ngIf="historique.length === 0">
+                <td colspan="4" class="empty-state">Aucun historique disponible.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div *ngIf="activeTab === 'documents'" class="tab-pane">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Nom du fichier</th>
+                <th>Taille</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let doc of documents">
+                <td>{{ doc.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td><span class="badge badge-info">{{ doc.type_document }}</span></td>
+                <td>{{ doc.nom_fichier }}</td>
+                <td>{{ doc.taille ? (doc.taille / 1024 | number:'1.0-0') + ' KB' : 'N/A' }}</td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" (click)="downloadDocument(doc)">
+                    <i class="fas fa-download"></i> Télécharger
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="documents.length === 0">
+                <td colspan="5" class="empty-state">Aucun document disponible pour ce locataire.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div *ngIf="activeTab === 'documents'" class="tab-pane">
-        <p class="empty-state"><i class="fas fa-folder-open fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Gestion des documents à venir.</p>
+      <!-- Onglet Informations -->
+      <div *ngIf="activeTab === 'infos' && locataire" class="tab-pane">
+        <div class="list-header" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+          <button class="btn" [ngClass]="editMode ? 'btn-secondary' : 'btn-outline-primary'" (click)="toggleEditMode()">
+            <i class="fas" [ngClass]="editMode ? 'fa-times' : 'fa-pencil-alt'"></i>
+            {{ editMode ? 'Annuler la modification' : 'Modifier les informations' }}
+          </button>
+        </div>
+
+        <div *ngIf="!editMode" class="info-grid">
+          <div class="info-item">
+            <label>Nom & Prénom</label>
+            <p>{{ locataire.nom }} {{ locataire.prenom }}</p>
+          </div>
+          <div class="info-item">
+            <label>Téléphone</label>
+            <p>{{ locataire.telephone }}</p>
+          </div>
+          <div class="info-item">
+            <label>Email</label>
+            <p>{{ locataire.email }}</p>
+          </div>
+          <div class="info-item">
+            <label>Profession</label>
+            <p>{{ locataire.profession }}</p>
+          </div>
+          <div class="info-item">
+            <label>N° CNI</label>
+            <p>{{ locataire.cni }}</p>
+          </div>
+          <div class="info-item">
+            <label>Adresse actuelle</label>
+            <p>{{ locataire.adresse }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="editMode">
+          <app-locataire-form [locId]="locataire.id_locataire || locataire.id!" [isEmbedded]="true"></app-locataire-form>
+        </div>
       </div>
     </div>
   </div>

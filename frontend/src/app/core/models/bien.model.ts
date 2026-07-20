@@ -3,6 +3,7 @@ export type StatutBien  = 'libre' | 'occupe' | 'reserve' | 'travaux';
 
 export interface Bien {
   id?:               number;
+  id_bien?:          number;
   reference:         string;
   type:              TypeBien;
   adresse:           string;

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Contrat extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\LogsHistorique;
 
     protected $table = 'contrats';
     protected $primaryKey = 'id_contrat';

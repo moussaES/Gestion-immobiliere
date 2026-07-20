@@ -3,225 +3,182 @@
 namespace App\Http\Controllers;
 
 use App\Models\Paiement;
+use App\Models\Document;
+use App\Http\Requests\StorePaiementRequest;
+use App\Http\Requests\UpdatePaiementRequest;
+use App\Http\Resources\PaiementResource;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class PaiementController extends Controller
 {
-    /**
-     * Afficher la liste de tous les paiements
-     */
     public function index()
     {
         try {
-            $paiements = Paiement::with('contrat', 'utilisateur')->get();
+            $paiements = Paiement::with('contrat.locataire', 'contrat.proprietaire', 'utilisateur')->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $paiements,
+                'data' => PaiementResource::collection($paiements)->response()->getData(true),
                 'message' => 'Liste des paiements récupérée avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Afficher un paiement spécifique
-     */
     public function show($id)
     {
         try {
-            $paiement = Paiement::with('contrat', 'utilisateur')->findOrFail($id);
+            $paiement = Paiement::with('contrat.locataire', 'contrat.proprietaire', 'utilisateur')->findOrFail($id);
             return response()->json([
                 'success' => true,
-                'data' => $paiement,
+                'data' => new PaiementResource($paiement),
                 'message' => 'Paiement récupéré avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Paiement non trouvé'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Paiement non trouvé'], 404);
         }
     }
 
-    /**
-     * Créer un nouveau paiement
-     */
-    public function store(Request $request)
+    public function store(StorePaiementRequest $request)
     {
         try {
-            $validated = $request->validate([
-                'reference' => 'required|string|unique:paiements|max:50',
-                'date_paiement' => 'required|date',
-                'montant' => 'required|numeric|min:0',
-                'mode_paiement' => 'required|in:CHEQUE,VIREMENT,ESPECES,WAVE,ORANGE_MONEY',
-                'statut' => 'sometimes|in:PAYE,PARTIEL,EN_ATTENTE',
-                'id_contrat' => 'required|exists:contrats,id_contrat',
-                'id_user_enregistrement' => 'sometimes|exists:utilisateurs,id_user',
-                'notes' => 'sometimes|string',
-            ]);
-
+            $validated = $request->validated();
             $paiement = Paiement::create($validated);
+
+            try {
+                $paiement->load('contrat.bien.proprietaire', 'contrat.locataire');
+                $contrat = $paiement->contrat;
+                $bien = $contrat ? $contrat->bien : null;
+                $proprietaire = $bien ? $bien->proprietaire : null;
+                $locataire = $contrat ? $contrat->locataire : null;
+
+                $documentData = new Document([
+                    'reference' => 'DOC-' . time() . '-' . rand(1000, 9999),
+                    'type' => 'RECU_PAIEMENT',
+                    'id_paiement' => $paiement->id_paiement,
+                    'id_contrat' => $contrat ? $contrat->id_contrat : null,
+                    'id_bien' => $bien ? $bien->id_bien : null,
+                    'id_proprietaire' => $proprietaire ? $proprietaire->id_proprietaire : null,
+                    'id_locataire' => $locataire ? $locataire->id_locataire : null,
+                    'chemin_fichier' => '',
+                    'nom_fichier' => 'Recu_Paiement_' . $paiement->reference . '.pdf',
+                ]);
+
+                $pdf = Pdf::loadView('pdfs.recu_paiement', [
+                    'paiement' => $paiement,
+                    'document' => $documentData,
+                    'contrat' => $contrat,
+                    'bien' => $bien,
+                    'proprietaire' => $proprietaire,
+                    'locataire' => $locataire,
+                ]);
+
+                $fileName = 'documents/' . $documentData->reference . '.pdf';
+                Storage::disk('public')->put($fileName, $pdf->output());
+
+                $documentData->chemin_fichier = $fileName;
+                $documentData->save();
+            } catch (\Exception $ex) {
+                \Illuminate\Support\Facades\Log::error('Erreur génération PDF : ' . $ex->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
-                'data' => $paiement,
-                'message' => 'Paiement créé avec succès'
+                'data' => new PaiementResource($paiement),
+                'message' => 'Paiement créé avec succès et reçu généré'
             ], 201);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur de validation',
-                'errors' => $e->errors()
-            ], 422);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Mettre à jour un paiement
-     */
-    public function update(Request $request, $id)
+    public function update(UpdatePaiementRequest $request, $id)
     {
         try {
             $paiement = Paiement::findOrFail($id);
-
-            $validated = $request->validate([
-                'reference' => 'sometimes|string|unique:paiements,reference,' . $id . ',id_paiement|max:50',
-                'date_paiement' => 'sometimes|date',
-                'montant' => 'sometimes|numeric|min:0',
-                'mode_paiement' => 'sometimes|in:CHEQUE,VIREMENT,ESPECES,WAVE,ORANGE_MONEY',
-                'statut' => 'sometimes|in:PAYE,PARTIEL,EN_ATTENTE',
-                'id_contrat' => 'sometimes|exists:contrats,id_contrat',
-                'notes' => 'sometimes|string',
-            ]);
-
+            $validated = $request->validated();
             $paiement->update($validated);
 
             return response()->json([
                 'success' => true,
-                'data' => $paiement,
+                'data' => new PaiementResource($paiement),
                 'message' => 'Paiement mis à jour avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Supprimer un paiement
-     */
     public function destroy($id)
     {
         try {
             $paiement = Paiement::findOrFail($id);
             $paiement->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Paiement supprimé avec succès'
-            ]);
+            return response()->json(['success' => true, 'message' => 'Paiement supprimé avec succès']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les paiements payés
-     */
     public function payes()
     {
         try {
-            $paiements = Paiement::paye()->get();
+            $paiements = Paiement::paye()->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $paiements,
+                'data' => PaiementResource::collection($paiements)->response()->getData(true),
                 'message' => 'Paiements payés récupérés avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les paiements en attente
-     */
     public function enAttente()
     {
         try {
-            $paiements = Paiement::enAttente()->get();
+            $paiements = Paiement::enAttente()->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $paiements,
+                'data' => PaiementResource::collection($paiements)->response()->getData(true),
                 'message' => 'Paiements en attente récupérés avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les paiements par mode
-     */
     public function byMode($mode)
     {
         try {
-            $paiements = Paiement::byMode($mode)->get();
+            $paiements = Paiement::byMode($mode)->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $paiements,
+                'data' => PaiementResource::collection($paiements)->response()->getData(true),
                 'message' => "Paiements par {$mode} récupérés"
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les paiements par mois
-     */
     public function byMois($mois)
     {
         try {
-            $paiements = Paiement::byMois($mois)->get();
+            $paiements = Paiement::byMois($mois)->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $paiements,
+                'data' => PaiementResource::collection($paiements)->response()->getData(true),
                 'message' => "Paiements du mois {$mois} récupérés"
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les statistiques de paiements
-     */
     public function statistiques()
     {
         try {
@@ -239,10 +196,7 @@ class PaiementController extends Controller
                 'message' => 'Statistiques des paiements récupérées'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 }

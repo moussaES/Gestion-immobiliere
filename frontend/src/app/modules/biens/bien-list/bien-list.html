@@ -42,9 +42,9 @@
           </span>
         </td>
         <td class="actions">
-          <!-- Pas de fiche bien pour l'instant -->
-          <a [routerLink]="['/biens/modifier', bien.id]" class="btn-icon">✏️</a>
-          <button (click)="supprimer(bien.id!)" class="btn-icon danger">🗑️</button>
+          <a [routerLink]="['/biens', $any(bien).id_bien]" class="btn-icon">👁️</a>
+          <a [routerLink]="['/biens/modifier', $any(bien).id_bien]" class="btn-icon">✏️</a>
+          <button (click)="supprimer($any(bien).id_bien!)" class="btn-icon danger">🗑️</button>
         </td>
       </tr>
       <tr *ngIf="biens.length === 0">

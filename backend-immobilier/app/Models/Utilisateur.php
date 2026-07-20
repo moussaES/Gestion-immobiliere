@@ -73,8 +73,4 @@ class Utilisateur extends Authenticatable
         return $query->where('role', 'GESTIONNAIRE');
     }
  
-    public function scopeComptable($query)
-    {
-        return $query->where('role', 'COMPTABLE');
-    }
 }

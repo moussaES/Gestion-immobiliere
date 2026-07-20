@@ -9,52 +9,72 @@
     <div class="form-row">
       <div class="form-group">
         <label>Référence *</label>
-        <input formControlName="reference" placeholder="PAI-001">
-        <span class="error" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
-          Requis
-        </span>
+        <input formControlName="reference" placeholder="PAI-001" [ngClass]="{'invalid-input': form.get('reference')?.invalid && form.get('reference')?.touched}">
+        <small class="error-text" *ngIf="form.get('reference')?.invalid && form.get('reference')?.touched">
+          La référence est requise.
+        </small>
       </div>
       <div class="form-group">
         <label>Date de paiement *</label>
-        <input type="date" formControlName="date_paiement">
-        <span class="error" *ngIf="form.get('date_paiement')?.invalid && form.get('date_paiement')?.touched">
-          Requis
-        </span>
+        <input type="date" formControlName="date_paiement" [ngClass]="{'invalid-input': form.get('date_paiement')?.invalid && form.get('date_paiement')?.touched}">
+        <small class="error-text" *ngIf="form.get('date_paiement')?.invalid && form.get('date_paiement')?.touched">
+          La date de paiement est requise.
+        </small>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label>Montant (FCFA) *</label>
-        <input type="number" formControlName="montant">
+        <input type="number" formControlName="montant" [ngClass]="{'invalid-input': form.get('montant')?.invalid && form.get('montant')?.touched}">
+        <small class="error-text" *ngIf="form.get('montant')?.invalid && form.get('montant')?.touched">
+          Le montant est requis et doit être > 0.
+        </small>
       </div>
       <div class="form-group">
         <label>Mois concerné *</label>
-        <input formControlName="mois_concerne" placeholder="ex: Janvier 2024">
-        <span class="error" *ngIf="form.get('mois_concerne')?.invalid && form.get('mois_concerne')?.touched">
-          Requis
-        </span>
+        <input formControlName="mois_concerne" placeholder="ex: Janvier 2024" [ngClass]="{'invalid-input': form.get('mois_concerne')?.invalid && form.get('mois_concerne')?.touched}">
+        <small class="error-text" *ngIf="form.get('mois_concerne')?.invalid && form.get('mois_concerne')?.touched">
+          Le mois concerné est requis.
+        </small>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label>Mode de paiement *</label>
-        <select formControlName="mode">
-          <option value="especes">Espèces</option>
-          <option value="virement">Virement</option>
-          <option value="cheque">Chèque</option>
-          <option value="wave">Wave</option>
-          <option value="orange_money">Orange Money</option>
+        <select formControlName="mode_paiement">
+          <option value="ESPECES">Espèces</option>
+          <option value="VIREMENT">Virement</option>
+          <option value="CHEQUE">Chèque</option>
+          <option value="WAVE">Wave</option>
+          <option value="ORANGE_MONEY">Orange Money</option>
         </select>
       </div>
       <div class="form-group">
         <label>Statut *</label>
         <select formControlName="statut">
-          <option value="paye">Payé</option>
-          <option value="partiel">Partiel</option>
-          <option value="en_attente">En attente</option>
-          <option value="retard">En retard</option>
+          <option value="PAYE">Payé</option>
+          <option value="PARTIEL">Partiel</option>
+          <option value="EN_ATTENTE">En attente</option>
+          <option value="IMPAYE">Impayé</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Filtrer par Locataire</label>
+        <select [(ngModel)]="selectedLocataireId" [ngModelOptions]="{standalone: true}" (change)="onLocataireChange($event)">
+          <option [value]="null">-- Tous les locataires --</option>
+          <option *ngFor="let l of locataires" [value]="l.id_locataire">{{ l.prenom }} {{ l.nom }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Filtrer par Propriétaire</label>
+        <select [(ngModel)]="selectedProprietaireId" [ngModelOptions]="{standalone: true}" (change)="onProprietaireChange($event)">
+          <option [value]="null">-- Tous les propriétaires --</option>
+          <option *ngFor="let p of proprietaires" [value]="p.id_proprietaire">{{ p.prenom }} {{ p.nom }}</option>
         </select>
       </div>
     </div>
@@ -62,14 +82,17 @@
     <div class="form-row">
       <div class="form-group">
         <label>Contrat *</label>
-        <select formControlName="id_contrat">
+        <select formControlName="id_contrat" [ngClass]="{'invalid-input': form.get('id_contrat')?.invalid && form.get('id_contrat')?.touched}">
           <option [value]="null">-- Sélectionner un contrat --</option>
-          <option *ngFor="let c of contrats" [value]="c.id">{{ c.reference }}</option>
+          <option *ngFor="let c of contrats" [value]="c.id_contrat">{{ c.reference }}</option>
         </select>
+        <small class="error-text" *ngIf="form.get('id_contrat')?.invalid && form.get('id_contrat')?.touched">
+          Un contrat est requis.
+        </small>
       </div>
       <div class="form-group">
         <label>Note</label>
-        <textarea formControlName="note" rows="2"></textarea>
+        <textarea formControlName="notes" rows="2"></textarea>
       </div>
     </div>
 

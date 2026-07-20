@@ -1,5 +1,6 @@
 export interface Locataire {
   id?:            number;
+  id_locataire?:  number;
   nom:            string;
   prenom:         string;
   telephone:      string;

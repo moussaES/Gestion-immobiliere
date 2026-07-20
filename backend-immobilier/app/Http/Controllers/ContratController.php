@@ -3,77 +3,57 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contrat;
+use App\Models\Document;
+use App\Http\Requests\StoreContratRequest;
+use App\Http\Requests\UpdateContratRequest;
+use App\Http\Resources\ContratResource;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 
 class ContratController extends Controller
 {
-    /**
-     * Afficher la liste de tous les contrats
-     */
     public function index()
     {
         try {
-            $contrats = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur', 'paiements')->get();
+            $contrats = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur', 'paiements')->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $contrats,
+                'data' => ContratResource::collection($contrats)->response()->getData(true),
                 'message' => 'Liste des contrats récupérée avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Afficher un contrat spécifique
-     */
     public function show($id)
     {
         try {
             $contrat = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur', 'paiements')->findOrFail($id);
             return response()->json([
                 'success' => true,
-                'data' => $contrat,
+                'data' => new ContratResource($contrat),
                 'message' => 'Contrat récupéré avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Contrat non trouvé'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Contrat non trouvé'], 404);
         }
     }
 
-    /**
-     * Créer un nouveau contrat
-     */
-    public function store(Request $request)
+    public function store(StoreContratRequest $request)
     {
         try {
-            $validated = $request->validate([
-                'reference' => 'required|string|unique:contrats|max:50',
-                'type_contrat' => 'required|in:LOCATAIRE,PROPRIETAIRE',
-                'date_debut' => 'required|date',
-                'date_fin' => 'required|date|after:date_debut',
-                'montant' => 'required|numeric|min:0',
-                'statut' => 'sometimes|in:ACTIF,RESILIE,ARCHIVE',
-                'id_bien' => 'required|exists:biens,id_bien',
-                'id_proprietaire' => 'required|exists:proprietaires,id_proprietaire',
-                'id_locataire' => 'sometimes|nullable|exists:locataires,id_locataire',
-                'id_user_createur' => 'sometimes|exists:utilisateurs,id_user',
-                'notes' => 'sometimes|string',
-            ]);
-
+            $validated = $request->validated();
             $contrat = Contrat::create($validated);
+            
+            $contratWithRelations = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur')->find($contrat->id_contrat);
+            $this->generateAndSaveDocument($contratWithRelations);
 
             return response()->json([
                 'success' => true,
-                'data' => $contrat,
+                'data' => new ContratResource($contrat),
                 'message' => 'Contrat créé avec succès'
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -83,114 +63,78 @@ class ContratController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            \Log::error('Erreur dans ContratController@store : ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Mettre à jour un contrat
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateContratRequest $request, $id)
     {
         try {
             $contrat = Contrat::findOrFail($id);
-
-            $validated = $request->validate([
-                'reference' => 'sometimes|string|unique:contrats,reference,' . $id . ',id_contrat|max:50',
-                'type_contrat' => 'sometimes|in:LOCATAIRE,PROPRIETAIRE',
-                'date_debut' => 'sometimes|date',
-                'date_fin' => 'sometimes|date|after:date_debut',
-                'montant' => 'sometimes|numeric|min:0',
-                'statut' => 'sometimes|in:ACTIF,RESILIE,ARCHIVE',
-                'id_bien' => 'sometimes|exists:biens,id_bien',
-                'id_proprietaire' => 'sometimes|exists:proprietaires,id_proprietaire',
-                'id_locataire' => 'sometimes|nullable|exists:locataires,id_locataire',
-                'notes' => 'sometimes|string',
-                'date_annulation' => 'sometimes|nullable|date',
-            ]);
-
+            $validated = $request->validated();
             $contrat->update($validated);
+
+            $contratWithRelations = Contrat::with('bien', 'proprietaire', 'locataire', 'utilisateur')->find($id);
+            $this->generateAndSaveDocument($contratWithRelations);
 
             return response()->json([
                 'success' => true,
-                'data' => $contrat,
+                'data' => new ContratResource($contrat),
                 'message' => 'Contrat mis à jour avec succès'
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+                'message' => 'Erreur de validation',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erreur dans ContratController@update : ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Supprimer un contrat
-     */
     public function destroy($id)
     {
         try {
             $contrat = Contrat::findOrFail($id);
             $contrat->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Contrat supprimé avec succès'
-            ]);
+            return response()->json(['success' => true, 'message' => 'Contrat supprimé avec succès']);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les contrats actifs
-     */
     public function actifs()
     {
         try {
-            $contrats = Contrat::actif()->get();
+            $contrats = Contrat::actif()->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $contrats,
+                'data' => ContratResource::collection($contrats)->response()->getData(true),
                 'message' => 'Contrats actifs récupérés avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les contrats en cours
-     */
     public function enCours()
     {
         try {
-            $contrats = Contrat::enCours()->get();
+            $contrats = Contrat::enCours()->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $contrats,
+                'data' => ContratResource::collection($contrats)->response()->getData(true),
                 'message' => 'Contrats en cours récupérés avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les paiements d'un contrat
-     */
     public function paiements($id)
     {
         try {
@@ -203,36 +147,24 @@ class ContratController extends Controller
                 'message' => 'Paiements du contrat récupérés avec succès'
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Récupérer les contrats par type
-     */
     public function byType($type)
     {
         try {
-            $contrats = Contrat::where('type_contrat', $type)->get();
+            $contrats = Contrat::where('type_contrat', $type)->paginate(15);
             return response()->json([
                 'success' => true,
-                'data' => $contrats,
+                'data' => ContratResource::collection($contrats)->response()->getData(true),
                 'message' => "Contrats de type {$type} récupérés"
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Exporter un contrat spécifique en PDF
-     */
     public function exportPdf($id)
     {
         try {
@@ -244,9 +176,6 @@ class ContratController extends Controller
         }
     }
 
-    /**
-     * Exporter un contrat spécifique en CSV
-     */
     public function exportCsv($id)
     {
         try {
@@ -268,8 +197,6 @@ class ContratController extends Controller
             ];
 
             $csvData = implode(';', $csvHeader) . "\n" . implode(';', $csvRow) . "\n";
-
-            // Ajout du BOM UTF-8 pour Excel
             $csvData = "\xEF\xBB\xBF" . $csvData;
 
             return Response::make($csvData, 200, [
@@ -281,9 +208,6 @@ class ContratController extends Controller
         }
     }
 
-    /**
-     * Exporter tous les contrats en PDF
-     */
     public function exportAllPdf()
     {
         try {
@@ -295,9 +219,6 @@ class ContratController extends Controller
         }
     }
 
-    /**
-     * Exporter tous les contrats en CSV
-     */
     public function exportAllCsv()
     {
         try {
@@ -323,7 +244,6 @@ class ContratController extends Controller
                 $csvData .= implode(';', $csvRow) . "\n";
             }
 
-            // Ajout du BOM UTF-8 pour Excel
             $csvData = "\xEF\xBB\xBF" . $csvData;
 
             return Response::make($csvData, 200, [
@@ -332,6 +252,32 @@ class ContratController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function generateAndSaveDocument(Contrat $contrat)
+    {
+        try {
+            $pdf = Pdf::loadView('exports.contrat', compact('contrat'));
+            $filename = "contrat_{$contrat->reference}.pdf";
+            $path = "documents/contrats/{$filename}";
+            
+            Storage::disk('public')->put($path, $pdf->output());
+
+            Document::updateOrCreate(
+                ['id_contrat' => $contrat->id_contrat],
+                [
+                    'reference' => 'DOC-' . $contrat->reference,
+                    'type' => 'CONTRAT',
+                    'nom_fichier' => $filename,
+                    'chemin_fichier' => $path,
+                    'id_bien' => $contrat->id_bien,
+                    'id_proprietaire' => $contrat->id_proprietaire,
+                    'id_locataire' => $contrat->id_locataire,
+                ]
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Erreur de génération de document: " . $e->getMessage());
         }
     }
 }
