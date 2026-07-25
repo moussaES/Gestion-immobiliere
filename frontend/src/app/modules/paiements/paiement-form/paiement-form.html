@@ -55,7 +55,6 @@
         <label>Statut *</label>
         <select formControlName="statut">
           <option value="PAYE">Payé</option>
-          <option value="PARTIEL">Partiel</option>
           <option value="EN_ATTENTE">En attente</option>
           <option value="IMPAYE">Impayé</option>
         </select>
@@ -63,14 +62,14 @@
     </div>
 
     <div class="form-row">
-      <div class="form-group">
+      <div class="form-group" *ngIf="!selectedContrat || selectedContrat.type_contrat === 'LOCATAIRE'">
         <label>Filtrer par Locataire</label>
         <select [(ngModel)]="selectedLocataireId" [ngModelOptions]="{standalone: true}" (change)="onLocataireChange($event)">
           <option [value]="null">-- Tous les locataires --</option>
           <option *ngFor="let l of locataires" [value]="l.id_locataire">{{ l.prenom }} {{ l.nom }}</option>
         </select>
       </div>
-      <div class="form-group">
+      <div class="form-group" *ngIf="!selectedContrat || selectedContrat.type_contrat === 'PROPRIETAIRE'">
         <label>Filtrer par Propriétaire</label>
         <select [(ngModel)]="selectedProprietaireId" [ngModelOptions]="{standalone: true}" (change)="onProprietaireChange($event)">
           <option [value]="null">-- Tous les propriétaires --</option>
@@ -89,10 +88,14 @@
         <small class="error-text" *ngIf="form.get('id_contrat')?.invalid && form.get('id_contrat')?.touched">
           Un contrat est requis.
         </small>
-      </div>
-      <div class="form-group">
-        <label>Note</label>
-        <textarea formControlName="notes" rows="2"></textarea>
+        <div *ngIf="selectedContrat" style="margin-top: 10px; font-size: 0.9em; padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #ddd;">
+          <div *ngIf="selectedContrat.type_contrat === 'LOCATAIRE'">
+            <strong>Locataire :</strong> {{ selectedContrat.locataire?.prenom }} {{ selectedContrat.locataire?.nom }}
+          </div>
+          <div *ngIf="selectedContrat.type_contrat === 'PROPRIETAIRE'">
+            <strong>Propriétaire :</strong> {{ selectedContrat.proprietaire?.prenom }} {{ selectedContrat.proprietaire?.nom }}
+          </div>
+        </div>
       </div>
     </div>
 

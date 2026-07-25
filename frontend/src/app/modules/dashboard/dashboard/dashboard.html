@@ -4,76 +4,82 @@
   <div class="dashboard-grid-new" *ngIf="stats">
     
     <!-- Row 1 -->
-    <div class="dashboard-card-new bg-purple">
-      <div class="dashboard-card-title">BIENS OCCUPÉS</div>
-      <div class="dashboard-card-value">{{ stats.biens_occupes }}</div>
-      <div class="dashboard-card-badge">BO</div>
-    </div>
+    <app-stat-card 
+      title="BIENS OCCUPÉS" 
+      [value]="stats.biens_occupes" 
+      badge="BO" 
+      color="purple">
+    </app-stat-card>
     
-    <div class="dashboard-card-new bg-cyan">
-      <div class="dashboard-card-title">BIENS LIBRES</div>
-      <div class="dashboard-card-value">{{ stats.biens_libres }}</div>
-      <div class="dashboard-card-badge">BL</div>
-    </div>
+    <app-stat-card 
+      title="BIENS LIBRES" 
+      [value]="stats.biens_libres" 
+      badge="BL" 
+      color="cyan">
+    </app-stat-card>
     
-    <div class="dashboard-card-new bg-blue">
-      <div class="dashboard-card-title">TOTAL BIENS</div>
-      <div class="dashboard-card-value">{{ stats.total_biens }}</div>
-      <div class="dashboard-card-badge">TB</div>
-    </div>
+    <app-stat-card 
+      title="TOTAL BIENS" 
+      [value]="stats.total_biens" 
+      badge="TB" 
+      color="blue">
+    </app-stat-card>
 
     <!-- Row 2 -->
-    <div class="dashboard-card-new bg-red">
-      <div class="dashboard-card-title">CONTRATS ACTIFS</div>
-      <div class="dashboard-card-value">{{ stats.contrats_actifs }}</div>
-      <div class="dashboard-card-badge">CA</div>
-    </div>
+    <app-stat-card 
+      title="CONTRATS ACTIFS" 
+      [value]="stats.contrats_actifs" 
+      badge="CA" 
+      color="red">
+    </app-stat-card>
     
-    <div class="dashboard-card-new bg-orange">
-      <div class="dashboard-card-title">PAIEMENTS EN ATTENTE</div>
-      <div class="dashboard-card-value">{{ stats.paiements_en_attente }}</div>
-      <div class="dashboard-card-badge">PA</div>
-    </div>
+    <app-stat-card 
+      title="PAIEMENTS EN ATTENTE" 
+      [value]="stats.paiements_en_attente" 
+      badge="PA" 
+      color="orange">
+    </app-stat-card>
     
-    <div class="dashboard-card-new bg-pink">
-      <div class="dashboard-card-title">PROPRIÉTAIRES</div>
-      <div class="dashboard-card-value">{{ stats.total_proprietaires }}</div>
-      <div class="dashboard-card-badge">PR</div>
-    </div>
+    <app-stat-card 
+      title="PROPRIÉTAIRES" 
+      [value]="stats.total_proprietaires" 
+      badge="PR" 
+      color="pink">
+    </app-stat-card>
 
     <!-- Row 3 -->
-    <div class="dashboard-card-new bg-magenta">
-      <div class="dashboard-card-title">LOCATAIRES</div>
-      <div class="dashboard-card-value">{{ stats.total_locataires }}</div>
-      <div class="dashboard-card-badge">LO</div>
-    </div>
+    <app-stat-card 
+      title="LOCATAIRES" 
+      [value]="stats.total_locataires" 
+      badge="LO" 
+      color="magenta">
+    </app-stat-card>
 
-    <div class="dashboard-card-new bg-cyan">
-      <div class="dashboard-card-title">TAUX D'OCCUPATION</div>
-      <div class="dashboard-card-value">{{ stats.taux_occupation }}%</div>
-      <div class="dashboard-card-badge">%</div>
-    </div>
+    <app-stat-card 
+      title="TAUX D'OCCUPATION" 
+      [value]="stats.taux_occupation + '%'" 
+      badge="%" 
+      color="cyan">
+    </app-stat-card>
 
-    <div class="dashboard-card-new bg-green">
-      <div class="dashboard-card-title">LOYERS COLLECTÉS (GLOBAL)</div>
-      <div class="dashboard-card-value">{{ stats.revenu_mensuel | number }} FCFA</div>
-      <div class="dashboard-card-badge">REV</div>
-    </div>
+    <app-stat-card 
+      title="LOYERS COLLECTÉS (GLOBAL)" 
+      [value]="stats.revenu_mensuel" 
+      [isCurrency]="true"
+      badge="REV" 
+      color="green">
+    </app-stat-card>
 
     <!-- Row 4 : Nouvelles cartes -->
-    <div class="dashboard-card-new bg-purple">
-      <div class="dashboard-card-title">PART PROPRIÉTAIRE (90%)</div>
-      <div class="dashboard-card-value">{{ stats.part_proprietaire_versee | number }} FCFA</div>
-      <div style="font-size: 12px; color: #fff; margin-top: 5px;">Attendu : {{ stats.part_proprietaire_attendue | number }} FCFA</div>
-      <div class="dashboard-card-badge">PRP</div>
-    </div>
 
-    <div class="dashboard-card-new bg-blue" *ngIf="isAdmin()">
-      <div class="dashboard-card-title">REVENU AGENCE (10%)</div>
-      <div class="dashboard-card-value">{{ stats.revenus_agence_encaisses | number }} FCFA</div>
-      <div style="font-size: 12px; color: #fff; margin-top: 5px;">Attendu : {{ stats.revenus_agence_attendus | number }} FCFA</div>
-      <div class="dashboard-card-badge">BLL</div>
-    </div>
+    <app-stat-card *ngIf="isAdmin()"
+      title="REVENU AGENCE (10%)" 
+      [value]="stats.revenus_agence_encaisses" 
+      [isCurrency]="true"
+      subtitle="Attendu : {{ stats.revenus_agence_attendus | number }} FCFA"
+      badge="BLL" 
+      color="blue">
+    </app-stat-card>
 
   </div>
 </div>

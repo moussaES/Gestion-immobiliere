@@ -27,11 +27,9 @@ import { Paiement } from '../../core/models';
           <label>Statut</label>
           <select [(ngModel)]="statutFilter" (change)="filterData()">
             <option value="">Tous</option>
-            <option value="paye">Payé</option>
-            <option value="en_attente">En attente</option>
-            <option value="impaye">Impayé</option>
-            <option value="en_retard">En retard</option>
-            <option value="annule">Annulé</option>
+            <option value="PAYE">Payé</option>
+            <option value="EN_ATTENTE">En attente</option>
+            <option value="IMPAYE">Impayé</option>
           </select>
           <label>Taille</label>
           <select [(ngModel)]="pageSize" (change)="currentPage = 1">
@@ -64,7 +62,7 @@ import { Paiement } from '../../core/models';
               <td>{{ formatDate(p.date_paiement) }}</td>
               <td>{{ p.mois_concerne }}</td>
               <td><span class="amount">{{ p.montant }} FCFA</span></td>
-              <td>{{ p.mode }}</td>
+              <td>{{ p.mode_paiement }}</td>
               <td><span class="badge" [ngClass]="getBadgeClass(p.statut)">{{ p.statut }}</span></td>
               <td class="actions">
                 <a [routerLink]="['/paiements', p.id_paiement]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>

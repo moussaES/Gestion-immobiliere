@@ -30,6 +30,7 @@ class ContratResource extends JsonResource
             'bien' => new BienResource($this->whenLoaded('bien')),
             'proprietaire' => new ProprietaireResource($this->whenLoaded('proprietaire')),
             'locataire' => new LocataireResource($this->whenLoaded('locataire')),
+            'paiements' => PaiementResource::collection($this->whenLoaded('paiements')),
             
             'date_creation' => $this->date_creation,
             'date_modification' => $this->date_modification,

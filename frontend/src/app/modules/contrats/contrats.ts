@@ -14,12 +14,15 @@ import { Contrat } from '../../core/models';
       <div class="list-header">
         <h2>Gestion des contrats</h2>
         <div class="header-actions">
-          <button class="btn btn-outline-secondary" style="margin-right: 10px;" (click)="exportPdf()"><i class="fas fa-file-pdf"></i> Export PDF</button>
-          <button class="btn btn-outline-secondary" style="margin-right: 20px;" (click)="exportCsv()"><i class="fas fa-file-csv"></i> Export CSV</button>
           <a routerLink="/contrats/nouveau" class="btn btn-outline-primary">+ NOUVEAU CONTRAT</a>
         </div>
       </div>
       
+      <div class="tabs">
+        <button [class.active]="activeTab === 'actifs'" (click)="setTab('actifs')">En cours</button>
+        <button [class.active]="activeTab === 'archives'" (click)="setTab('archives')">Archives & Résiliés</button>
+      </div>
+
       <div class="filter-bar">
         <div class="search-input">
           <i class="fas fa-search"></i>
@@ -32,10 +35,9 @@ import { Contrat } from '../../core/models';
             <option value="LOCATAIRE">Locataire</option>
             <option value="PROPRIETAIRE">Propriétaire</option>
           </select>
-          <label>Statut</label>
-          <select [(ngModel)]="statutFilter" (change)="filterData()">
+          <label *ngIf="activeTab === 'archives'">Statut</label>
+          <select *ngIf="activeTab === 'archives'" [(ngModel)]="statutFilter" (change)="filterData()">
             <option value="">Tous</option>
-            <option value="ACTIF">Actif</option>
             <option value="RESILIE">Résilié</option>
             <option value="ARCHIVE">Archivé</option>
           </select>
@@ -124,6 +126,11 @@ import { Contrat } from '../../core/models';
     }
     .btn-outline-secondary:hover { background: #555; color: #fff; }
     
+    .tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 20px; }
+    .tabs button { padding: 12px 24px; background: none; border: none; font-size: 14px; font-weight: 600; color: #666; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s; }
+    .tabs button.active { color: #1a237e; border-bottom-color: #1a237e; }
+    .tabs button:hover:not(.active) { color: #333; }
+
     .filter-bar { display: flex; gap: 20px; margin-bottom: 20px; align-items: center; }
     .search-input { 
       position: relative; display: flex; align-items: center; background: #fff; 
@@ -177,6 +184,13 @@ export class ContratsComponent implements OnInit {
   searchTerm = '';
   typeFilter = '';
   statutFilter = '';
+  activeTab: 'actifs' | 'archives' = 'actifs';
+
+  setTab(tab: 'actifs' | 'archives'): void {
+    this.activeTab = tab;
+    this.statutFilter = '';
+    this.filterData();
+  }
 
   constructor(
     private contratSvc: ContratService,
@@ -202,13 +216,16 @@ export class ContratsComponent implements OnInit {
 
   filterData(): void {
     this.filteredContrats = this.contrats.filter(c => {
+      const isArchiveTab = this.activeTab === 'archives';
+      const matchTab = isArchiveTab ? (c.statut === 'RESILIE' || c.statut === 'ARCHIVE') : (c.statut !== 'RESILIE' && c.statut !== 'ARCHIVE');
+
       const ref = c.reference || '';
       const matchSearch = this.searchTerm ? 
         ref.toLowerCase().includes(this.searchTerm.toLowerCase()) 
         : true;
       const matchType = this.typeFilter ? c.type_contrat === this.typeFilter : true;
       const matchStatut = this.statutFilter ? c.statut === this.statutFilter : true;
-      return matchSearch && matchType && matchStatut;
+      return matchTab && matchSearch && matchType && matchStatut;
     });
     this.currentPage = 1;
   }
@@ -225,14 +242,10 @@ export class ContratsComponent implements OnInit {
   formatDate(dateStr?: string): string {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    return d.toLocaleDateString('fr-FR');
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}/${m}/${day}`;
   }
 
-  exportPdf(): void {
-    window.open('http://127.0.0.1:8000/api/contrats/export/pdf/all', '_blank');
-  }
-
-  exportCsv(): void {
-    window.open('http://127.0.0.1:8000/api/contrats/export/csv/all', '_blank');
-  }
 }

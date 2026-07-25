@@ -20,7 +20,7 @@ class StoreLocataireRequest extends FormRequest
             'email' => 'sometimes|email|unique:locataires|max:150|nullable',
             'profession' => 'sometimes|string|max:100|nullable',
             'adresse' => 'sometimes|string|max:255|nullable',
-            'cni' => 'sometimes|string|unique:locataires|max:50|nullable',
+            'cni' => ['sometimes', 'nullable', 'string', 'unique:locataires', 'regex:/^\d{17}$/'],
         ];
     }
 }

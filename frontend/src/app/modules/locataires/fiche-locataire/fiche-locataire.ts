@@ -52,7 +52,7 @@ export class FicheLocataireComponent implements OnInit {
   get totalPaiementsMois(): number {
     const monthIndex = this.months.indexOf(this.selectedMonth);
     return this.paiements
-      .filter(p => String(p.statut).toLowerCase() === 'paye' || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => String(p.statut).toLowerCase() === 'paye')
       .filter(p => {
         const pd = new Date(p.date_paiement);
         return pd.getMonth() === monthIndex && pd.getFullYear() === Number(this.selectedYear);
@@ -63,7 +63,7 @@ export class FicheLocataireComponent implements OnInit {
   get countPaiementsMois(): number {
     const monthIndex = this.months.indexOf(this.selectedMonth);
     return this.paiements
-      .filter(p => String(p.statut).toLowerCase() === 'paye' || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => String(p.statut).toLowerCase() === 'paye')
       .filter(p => {
         const pd = new Date(p.date_paiement);
         return pd.getMonth() === monthIndex && pd.getFullYear() === Number(this.selectedYear);
@@ -72,7 +72,7 @@ export class FicheLocataireComponent implements OnInit {
 
   get totalPaiementsAnnee(): number {
     return this.paiements
-      .filter(p => String(p.statut).toLowerCase() === 'paye' || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => String(p.statut).toLowerCase() === 'paye')
       .filter(p => new Date(p.date_paiement).getFullYear() === Number(this.selectedYear))
       .reduce((sum, p) => sum + Number(p.montant), 0);
   }
@@ -93,7 +93,7 @@ export class FicheLocataireComponent implements OnInit {
 
   get dernierPaiement(): any {
     const sorted = [...this.paiements]
-      .filter(p => String(p.statut).toLowerCase() === 'paye' || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => String(p.statut).toLowerCase() === 'paye')
       .sort((a, b) => new Date(b.date_paiement).getTime() - new Date(a.date_paiement).getTime());
     return sorted.length > 0 ? sorted[0] : null;
   }
@@ -191,3 +191,4 @@ export class FicheLocataireComponent implements OnInit {
     this.router.navigate(['/locataires']);
   }
 }
+

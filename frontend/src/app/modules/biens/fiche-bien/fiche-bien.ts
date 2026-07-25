@@ -41,7 +41,7 @@ export class FicheBienComponent implements OnInit {
     const currentYear = new Date().getFullYear();
     
     return this.paiements
-      .filter(p => String(p.statut).toLowerCase() === 'paye' || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => String(p.statut).toLowerCase() === 'paye')
       .filter(p => {
         const pd = new Date(p.date_paiement);
         return pd.getMonth() === currentMonth && pd.getFullYear() === currentYear;
@@ -148,3 +148,4 @@ export class FicheBienComponent implements OnInit {
     return '';
   }
 }
+

@@ -33,7 +33,7 @@ export class ProprietaireFormComponent implements OnInit {
       telephone: ['', Validators.required],
       email:     ['', [Validators.required, Validators.email]],
       adresse:   ['', Validators.required],
-      cni:       ['', Validators.required],
+      cni:       ['', [Validators.required, Validators.pattern(/^\d{17}$/)]],
     });
   }
 

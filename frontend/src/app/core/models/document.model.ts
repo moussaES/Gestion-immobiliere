@@ -1,6 +1,6 @@
 export interface Document {
   id_document?: number;
-  type_document: string;
+  type: string;
   chemin_fichier: string;
   nom_fichier: string;
   taille?: number;

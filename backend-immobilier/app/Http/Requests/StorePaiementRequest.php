@@ -18,10 +18,18 @@ class StorePaiementRequest extends FormRequest
             'date_paiement' => 'required|date',
             'montant' => 'required|numeric|min:0',
             'mode_paiement' => 'required|in:CHEQUE,VIREMENT,ESPECES,WAVE,ORANGE_MONEY',
-            'statut' => 'sometimes|in:PAYE,PARTIEL,EN_ATTENTE,IMPAYE',
+            'statut' => 'sometimes|in:PAYE,EN_ATTENTE,IMPAYE',
             'id_contrat' => 'required|exists:contrats,id_contrat',
             'id_user_enregistrement' => 'sometimes|exists:utilisateurs,id_user',
             'notes' => 'sometimes|string|nullable',
+            'mois_concerne' => [
+                'required',
+                'string',
+                'max:20',
+                \Illuminate\Validation\Rule::unique('paiements')->where(function ($query) {
+                    return $query->where('id_contrat', $this->input('id_contrat'));
+                }),
+            ],
         ];
     }
 }

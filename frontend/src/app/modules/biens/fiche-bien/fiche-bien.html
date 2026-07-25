@@ -43,9 +43,7 @@
       <button [class.active]="activeTab === 'contrats'" (click)="activeTab = 'contrats'">
         Contrats ({{ contrats.length }})
       </button>
-      <button [class.active]="activeTab === 'interventions'" (click)="activeTab = 'interventions'">
-        Interventions
-      </button>
+
       <button [class.active]="activeTab === 'paiements'" (click)="activeTab = 'paiements'">
         Paiements ({{ paiements.length }})
       </button>
@@ -123,8 +121,8 @@
               <tr *ngFor="let contrat of contrats">
                 <td>{{ contrat.reference }}</td>
                 <td>{{ contrat.locataire?.nom || 'Locataire #' + contrat.id_locataire }}</td>
-                <td>{{ contrat.date_debut }}</td>
-                <td>{{ contrat.date_fin }}</td>
+                <td>{{ contrat.date_debut | date:'yyyy/MM/dd' }}</td>
+                <td>{{ contrat.date_fin | date:'yyyy/MM/dd' }}</td>
                 <td>{{ contrat.montant }} FCFA</td>
                 <td><span class="badge" [ngClass]="'badge-' + contrat.statut">{{ contrat.statut }}</span></td>
               </tr>
@@ -136,9 +134,7 @@
         </div>
       </div>
 
-      <div *ngIf="activeTab === 'interventions'" class="tab-pane">
-        <p class="empty-state"><i class="fas fa-hammer fa-3x" style="color: #ddd; margin-bottom: 16px; display:block;"></i>Module Interventions et Travaux à venir.</p>
-      </div>
+
 
       <!-- Onglet Paiements -->
       <div *ngIf="activeTab === 'paiements'" class="tab-pane">
@@ -156,11 +152,11 @@
             </thead>
             <tbody>
               <tr *ngFor="let p of paiements">
-                <td>{{ p.date_paiement }}</td>
+                <td>{{ p.date_paiement | date:'yyyy/MM/dd' }}</td>
                 <td>Contrat #{{ p.id_contrat }}</td>
                 <td>{{ p.date_paiement | date:'MM/yyyy' }}</td>
                 <td>{{ p.montant }} FCFA</td>
-                <td>{{ p.mode }}</td>
+                <td>{{ p.mode_paiement }}</td>
                 <td><span class="badge" [ngClass]="p.statut === 'paye' ? 'badge-actif' : 'badge-inactif'">{{ p.statut }}</span></td>
               </tr>
               <tr *ngIf="paiements.length === 0">
@@ -214,7 +210,7 @@
             <tbody>
               <tr *ngFor="let doc of documents">
                 <td>{{ doc.date_creation | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td><span class="badge badge-info">{{ doc.type_document }}</span></td>
+                <td><span class="badge badge-info">{{ doc.type }}</span></td>
                 <td>{{ doc.nom_fichier }}</td>
                 <td>{{ doc.taille ? (doc.taille / 1024 | number:'1.0-0') + ' KB' : 'N/A' }}</td>
                 <td>

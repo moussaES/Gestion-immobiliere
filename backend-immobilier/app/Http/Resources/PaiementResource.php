@@ -17,6 +17,7 @@ class PaiementResource extends JsonResource
             'mode_paiement' => $this->mode_paiement,
             'statut' => $this->statut,
             'notes' => $this->notes,
+            'mois_concerne' => $this->mois_concerne,
             'id_contrat' => $this->id_contrat,
             'id_user_enregistrement' => $this->id_user_enregistrement,
             

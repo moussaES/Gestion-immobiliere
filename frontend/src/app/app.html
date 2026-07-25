@@ -5,7 +5,7 @@
       <button class="menu-toggle" (click)="toggleSidebar()">≡</button>
       <h3 class="app-logo">
         <img src="assets/logo.jpeg" alt="Logo" class="agency-logo" />
-        Étoiles du Sine
+        GESTIMMO
       </h3>
     </div>
     
@@ -54,6 +54,9 @@
       </a>
       <a *ngIf="isAdmin()" routerLink="/historique" routerLinkActive="active">
         <span class="icon">⏳</span> <span class="nav-text">Historique</span>
+      </a>
+      <a routerLink="/parametres" routerLinkActive="active">
+        <span class="icon">⚙️</span> <span class="nav-text">Paramètres</span>
       </a>
     </nav>
   </aside>

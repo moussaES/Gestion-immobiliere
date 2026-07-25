@@ -19,7 +19,7 @@ class StoreProprietaireRequest extends FormRequest
             'telephone' => 'required|string|unique:proprietaires|max:20',
             'email' => 'sometimes|email|unique:proprietaires|max:150|nullable',
             'adresse' => 'required|string|max:255',
-            'cni' => 'sometimes|string|unique:proprietaires|max:50|nullable',
+            'cni' => ['sometimes', 'nullable', 'string', 'unique:proprietaires', 'regex:/^\d{17}$/'],
         ];
     }
 }

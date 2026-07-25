@@ -258,7 +258,11 @@ export class FicheContratComponent implements OnInit, OnDestroy {
 
   formatDate(dateStr?: string): string {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('fr-FR');
+    const d = new Date(dateStr);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}/${m}/${day}`;
   }
 
   getBadgePaiementClass(statut: string): string {

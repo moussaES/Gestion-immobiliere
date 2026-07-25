@@ -36,6 +36,15 @@ Route::middleware('api')->group(function () {
     });
 
     // ====================================================================
+    // Routes: PROFIL (paramètres compte)
+    // ====================================================================
+    Route::prefix('profil')->group(function () {
+        Route::get('{id}', [\App\Http\Controllers\ProfilController::class, 'show']);
+        Route::put('{id}/infos', [\App\Http\Controllers\ProfilController::class, 'updateProfil']);
+        Route::put('{id}/mot-de-passe', [\App\Http\Controllers\ProfilController::class, 'changePassword']);
+    });
+
+    // ====================================================================
     // Routes: PROPRIÉTAIRES
     // ====================================================================
     Route::prefix('proprietaires')->group(function () {
@@ -217,3 +226,4 @@ Route::get('/health', function () {
         'timestamp' => now(),
     ]);
 });
+

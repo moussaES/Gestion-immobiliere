@@ -27,6 +27,7 @@ export class PaiementFormComponent implements OnInit {
   
   selectedLocataireId: number | null = null;
   selectedProprietaireId: number | null = null;
+  selectedContrat: any = null;
 
   constructor(
     private fb:          FormBuilder,
@@ -45,7 +46,6 @@ export class PaiementFormComponent implements OnInit {
       mode_paiement: ['ESPECES', Validators.required],
       statut:        ['PAYE', Validators.required],
       mois_concerne: ['', Validators.required],
-      notes:         [''],
       id_contrat:    [null, Validators.required],
     });
   }
@@ -59,6 +59,12 @@ export class PaiementFormComponent implements OnInit {
       this.allContrats = r.data.data || r.data;
       this.contrats = [...this.allContrats];
     });
+
+    // Date du jour par défaut pour les nouveaux paiements
+    if (!this.route.snapshot.params['id']) {
+      const today = new Date().toISOString().split('T')[0];
+      this.form.patchValue({ date_paiement: today });
+    }
 
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
@@ -84,6 +90,25 @@ export class PaiementFormComponent implements OnInit {
         });
       } else {
         this.genererReference();
+      }
+    });
+
+    this.form.get('id_contrat')?.valueChanges.subscribe(contratId => {
+      if (contratId) {
+        this.selectedContrat = this.allContrats.find(c => c.id_contrat == contratId);
+        if (this.selectedContrat) {
+          this.form.patchValue({
+            montant: this.selectedContrat.montant || 0
+          });
+          
+          if (this.selectedContrat.type_contrat === 'LOCATAIRE') {
+            this.selectedLocataireId = this.selectedContrat.id_locataire;
+          } else if (this.selectedContrat.type_contrat === 'PROPRIETAIRE') {
+            this.selectedProprietaireId = this.selectedContrat.id_proprietaire;
+          }
+        }
+      } else {
+        this.selectedContrat = null;
       }
     });
   }

@@ -21,7 +21,7 @@ class UpdateProprietaireRequest extends FormRequest
             'telephone' => 'sometimes|string|unique:proprietaires,telephone,' . $id . ',id_proprietaire|max:20',
             'email' => 'sometimes|email|unique:proprietaires,email,' . $id . ',id_proprietaire|max:150|nullable',
             'adresse' => 'sometimes|string|max:255',
-            'cni' => 'sometimes|string|unique:proprietaires,cni,' . $id . ',id_proprietaire|max:50|nullable',
+            'cni' => ['sometimes', 'nullable', 'string', 'regex:/^\d{17}$/', 'unique:proprietaires,cni,' . $id . ',id_proprietaire'],
         ];
     }
 }

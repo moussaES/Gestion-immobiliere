@@ -49,10 +49,36 @@ export class ContratFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Charger les listes pour les select
-    this.bienSvc.getAll().subscribe(r => this.biens = r.data.data || r.data);
     this.locSvc.getAll().subscribe(r => this.locataires = r.data.data || r.data);
     this.propSvc.getAll().subscribe(r => this.proprietaires = r.data.data || r.data);
+
+    // Charger les biens ET les contrats actifs pour filtrer les biens déjà occupés
+    this.contratSvc.getAll().subscribe((contratsRes: any) => {
+      const tousContrats = contratsRes.data.data || contratsRes.data || [];
+
+      // IDs des biens ayant un contrat LOCATAIRE actif (déjà occupés)
+      const biensOccupes = new Set<number>(
+        tousContrats
+          .filter((c: any) => c.statut === 'ACTIF' && c.type_contrat === 'LOCATAIRE')
+          .map((c: any) => Number(c.id_bien))
+      );
+
+      this.bienSvc.getAll().subscribe(r => {
+        const tousBiens = r.data.data || r.data;
+
+        if (this.isEdit && this.contratId) {
+          // En mode édition : on réintègre le bien du contrat courant dans la liste
+          const contratCourant = tousContrats.find((c: any) => c.id_contrat == this.contratId);
+          const idBienCourant = contratCourant ? Number(contratCourant.id_bien) : null;
+          this.biens = tousBiens.filter((b: any) =>
+            !biensOccupes.has(Number(b.id_bien)) || Number(b.id_bien) === idBienCourant
+          );
+        } else {
+          // En mode création : seulement les biens sans contrat LOCATAIRE actif
+          this.biens = tousBiens.filter((b: any) => !biensOccupes.has(Number(b.id_bien)));
+        }
+      });
+    });
 
     this.contratId = Number(this.route.snapshot.params['id']);
     if (this.contratId) {
@@ -73,10 +99,22 @@ export class ContratFormComponent implements OnInit {
         this.genererReference(type);
       }
     });
+
+    this.form.get('id_bien')?.valueChanges.subscribe(bienId => {
+      if (bienId) {
+        const selectedBien = this.biens.find(b => b.id_bien == bienId);
+        if (selectedBien) {
+          this.form.patchValue({
+            montant: selectedBien.loyer_mensuel || 0,
+            id_proprietaire: selectedBien.id_proprietaire
+          });
+        }
+      }
+    });
   }
 
   genererReference(type: string): void {
-    const prefix = type === 'LOCATAIRE' ? 'CTR-LOC-' : 'CTR-PROP-';
+    const prefix = type === 'LOCATAIRE' ? 'CONT-LOC-' : 'CONT-PRO-';
     
     this.contratSvc.getAll().subscribe((r: any) => {
       const contrats = r.data.data || r.data || [];

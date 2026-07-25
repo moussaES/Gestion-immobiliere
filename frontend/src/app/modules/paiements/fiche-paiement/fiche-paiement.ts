@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PaiementService } from '../../../core/services/paiement.service';
@@ -7,7 +7,7 @@ import { Paiement } from '../../../core/models';
 
 @Component({
   selector: 'app-fiche-paiement',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DecimalPipe],
   template: `
     <div class="fiche-section">
       <div class="back-btn" (click)="back()">
@@ -37,7 +37,9 @@ import { Paiement } from '../../../core/models';
       <div class="tabs" *ngIf="paiement">
         <div class="tab-header">
           <button [class.active]="activeTab === 'informations'" (click)="activeTab = 'informations'">Informations</button>
-          <button [class.active]="activeTab === 'documents'" (click)="activeTab = 'documents'">Documents</button>
+          <button [class.active]="activeTab === 'documents'" (click)="activeTab = 'documents'">
+            <i class="fas fa-receipt"></i> Reçu de paiement
+          </button>
         </div>
         <div class="tab-content">
           <!-- ONGLET INFORMATIONS -->
@@ -59,7 +61,7 @@ import { Paiement } from '../../../core/models';
               </div>
               <div class="info-item">
                 <label>Mode de paiement</label>
-                <p style="text-transform: capitalize;">{{ paiement.mode }}</p>
+                <p style="text-transform: capitalize;">{{ paiement.mode_paiement }}</p>
               </div>
               <div class="info-item">
                 <label>Date du paiement</label>
@@ -78,7 +80,7 @@ import { Paiement } from '../../../core/models';
             <div class="info-grid" style="margin-top: 24px;">
               <div class="info-item" style="grid-column: 1 / -1;">
                 <label>Notes / Observations</label>
-                <p>{{ paiement.note || 'Aucune note.' }}</p>
+                <p>{{ paiement.notes || 'Aucune note.' }}</p>
               </div>
             </div>
 
@@ -89,7 +91,11 @@ import { Paiement } from '../../../core/models';
                 <p>{{ paiement.contrat.reference }}</p>
                 <a [routerLink]="['/contrats', paiement.id_contrat]" style="font-size: 13px; color: #1a237e; text-decoration: none;">Voir le contrat</a>
               </div>
-              <div class="info-item" *ngIf="paiement.contrat?.locataire">
+              <div class="info-item" *ngIf="paiement.contrat?.bien">
+                <label>Bien</label>
+                <p>{{ paiement.contrat.bien.type }} - {{ paiement.contrat.bien.adresse }}</p>
+              </div>
+              <div class="info-item" *ngIf="paiement.contrat?.type_contrat !== 'PROPRIETAIRE' && paiement.contrat?.locataire">
                 <label>Locataire</label>
                 <p>{{ paiement.contrat.locataire.prenom }} {{ paiement.contrat.locataire.nom }}</p>
               </div>
@@ -104,9 +110,62 @@ import { Paiement } from '../../../core/models';
             </div>
           </div>
 
-          <!-- ONGLET DOCUMENTS -->
+          <!-- ONGLET REÇU DE PAIEMENT -->
           <div class="tab-pane" *ngIf="activeTab === 'documents'">
-            <div class="empty-state">Aucun reçu ou document rattaché à ce paiement pour le moment.</div>
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+              <button class="btn btn-outline-primary" (click)="imprimerRecu()">
+                <i class="fas fa-print"></i> Imprimer / Télécharger
+              </button>
+            </div>
+            <div id="recu-paiement" class="recu-wrapper" style="padding: 40px;">
+              <div class="recu-header" style="text-align: center; border-bottom: 2px solid #0056b3; padding-bottom: 20px; margin-bottom: 30px;">
+                <img src="assets/logo.jpeg" alt="Logo" style="height: 60px; margin-bottom: 15px;">
+                <h1 style="color: #0056b3; margin: 0; font-size: 24px; letter-spacing: 1px;">REÇU DE PAIEMENT</h1>
+                <p style="margin: 5px 0 0; color: #333;">Référence du reçu : {{ paiement.reference }}</p>
+                <p style="margin: 5px 0 0; color: #333;">Date : {{ formatDate(paiement.date_paiement) }}</p>
+              </div>
+              
+              <div class="recu-amount-box" style="background-color: #f8f9fa; padding: 15px; border-left: 5px solid #28a745; margin-bottom: 30px;">
+                <h2 style="margin: 0 0 10px 0; color: #28a745; font-size: 20px;">Montant payé : {{ paiement.montant | number }} FCFA</h2>
+                <p style="margin: 5px 0;">Mode de paiement : <span style="text-transform: capitalize;">{{ paiement.mode_paiement }}</span></p>
+                <p style="margin: 5px 0;">Statut du paiement : {{ paiement.statut }}</p>
+              </div>
+
+              <div class="recu-details-section" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px; font-size: 16px; color: #333; text-transform: none; letter-spacing: normal;">Informations sur la Location</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr *ngIf="paiement.contrat?.type_contrat !== 'PROPRIETAIRE' && paiement.contrat?.locataire">
+                    <td style="padding: 8px 0; width: 40%;"><strong>Locataire :</strong></td>
+                    <td style="padding: 8px 0;">{{ paiement.contrat.locataire.prenom + ' ' + paiement.contrat.locataire.nom }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;"><strong>Bien :</strong></td>
+                    <td style="padding: 8px 0;">{{ paiement.contrat?.bien ? (paiement.contrat.bien.type + ' - ' + paiement.contrat.bien.adresse) : 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;"><strong>Propriétaire :</strong></td>
+                    <td style="padding: 8px 0;">{{ paiement.contrat?.proprietaire ? (paiement.contrat.proprietaire.prenom + ' ' + paiement.contrat.proprietaire.nom) : 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;"><strong>Contrat :</strong></td>
+                    <td style="padding: 8px 0;">{{ paiement.contrat ? paiement.contrat.reference : 'N/A' }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;"><strong>Mois concerné :</strong></td>
+                    <td style="padding: 8px 0;">{{ paiement.mois_concerne }}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0;"><strong>Référence du paiement :</strong></td>
+                    <td style="padding: 8px 0;">{{ paiement.reference }}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="recu-footer" style="margin-top: 50px; text-align: right;">
+                <p style="margin-bottom: 30px; color: #333;">L'Administrateur / Le Propriétaire</p>
+                <div style="border-top: 1px solid #ccc; display: inline-block; padding-top: 5px; width: 200px; text-align: center; color: #333;">Signature et Cachet</div>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -148,6 +207,16 @@ import { Paiement } from '../../../core/models';
 
     .btn-outline-primary { border: 1px solid #1a237e; color: #1a237e; background: transparent; padding: 8px 16px; border-radius: 4px; font-weight: 600; text-decoration: none; font-size: 13px; transition: all 0.2s; cursor: pointer; display: inline-block; }
     .btn-outline-primary:hover { background: #1a237e; color: #fff; }
+
+    /* Styles du reçu de paiement */
+    .recu-wrapper { background: #fff; border: 1px solid #ddd; border-radius: 8px; max-width: 800px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-family: 'Helvetica', 'Arial', sans-serif; color: #333; }
+    
+    @media print { 
+      .btn-outline-primary { display: none !important; }
+      body * { visibility: hidden; }
+      #recu-paiement, #recu-paiement * { visibility: visible; }
+      #recu-paiement { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; padding: 0 !important; }
+    }
   `]
 })
 export class FichePaiementComponent implements OnInit, OnDestroy {
@@ -155,6 +224,7 @@ export class FichePaiementComponent implements OnInit, OnDestroy {
   activeTab: string = 'informations';
   loading: boolean = true;
   currentId: string | null = '';
+  today: Date = new Date();
   private routeSub!: Subscription;
 
   constructor(
@@ -213,5 +283,16 @@ export class FichePaiementComponent implements OnInit, OnDestroy {
   formatDate(dateStr?: string): string {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('fr-FR');
+  }
+
+  imprimerRecu(): void {
+    const recuEl = document.getElementById('recu-paiement');
+    if (!recuEl) return;
+    const printContents = recuEl.innerHTML;
+    const originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+    window.location.reload();
   }
 }

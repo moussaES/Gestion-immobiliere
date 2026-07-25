@@ -60,9 +60,13 @@
     <div class="form-row">
       <div class="form-group">
         <label>CNI *</label>
-        <input formControlName="cni" placeholder="Numéro CNI" [ngClass]="{'invalid-input': form.get('cni')?.invalid && form.get('cni')?.touched}">
-        <small class="error-text" *ngIf="form.get('cni')?.invalid && form.get('cni')?.touched">
+        <input formControlName="cni" placeholder="Numéro CNI (17 chiffres)" maxlength="17"
+          [ngClass]="{'invalid-input': form.get('cni')?.invalid && form.get('cni')?.touched}">
+        <small class="error-text" *ngIf="form.get('cni')?.errors?.['required'] && form.get('cni')?.touched">
           La CNI est requise.
+        </small>
+        <small class="error-text" *ngIf="form.get('cni')?.errors?.['pattern'] && form.get('cni')?.touched">
+          La CNI doit contenir exactement 17 chiffres.
         </small>
       </div>
     </div>

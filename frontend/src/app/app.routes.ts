@@ -183,6 +183,10 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
         loadComponent: () => import('./modules/documents/documents.component').then(m => m.DocumentsComponent)
       },
+      {
+        path: 'parametres',
+        loadComponent: () => import('./modules/parametres/parametres').then(m => m.ParametresComponent)
+      },
     ],
   },
 

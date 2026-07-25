@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProprietaireService } from '../../../core/services/proprietaire.service';
 import { ContratService } from '../../../core/services/contrat.service';
+import { PaiementService } from '../../../core/services/paiement.service';
 import { TravailService } from '../../../core/services/travail.service';
 import { HistoriqueService } from '../../../core/services/historique.service';
 import { DocumentService } from '../../../core/services/document.service';
@@ -39,6 +40,7 @@ export class FicheProprietaireComponent implements OnInit {
     private propService: ProprietaireService,
     private bienService: BienService,
     private contratService: ContratService,
+    private paiementService: PaiementService,
     private travailService: TravailService,
     private historiqueService: HistoriqueService,
     private documentService: DocumentService
@@ -53,7 +55,7 @@ export class FicheProprietaireComponent implements OnInit {
   get totalPaiementsMois(): number {
     const monthIndex = this.months.indexOf(this.selectedMonth);
     const sum = this.paiements
-      .filter(p => this.isPaye(p.statut) || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => this.isPaye(p.statut))
       .filter(p => {
         const pd = new Date(p.date_paiement);
         return pd.getMonth() === monthIndex && pd.getFullYear() === Number(this.selectedYear);
@@ -65,7 +67,7 @@ export class FicheProprietaireComponent implements OnInit {
   get countPaiementsMois(): number {
     const monthIndex = this.months.indexOf(this.selectedMonth);
     return this.paiements
-      .filter(p => this.isPaye(p.statut) || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => this.isPaye(p.statut))
       .filter(p => {
         const pd = new Date(p.date_paiement);
         return pd.getMonth() === monthIndex && pd.getFullYear() === Number(this.selectedYear);
@@ -74,7 +76,7 @@ export class FicheProprietaireComponent implements OnInit {
 
   get totalPaiementsAnnee(): number {
     const sum = this.paiements
-      .filter(p => this.isPaye(p.statut) || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => this.isPaye(p.statut))
       .filter(p => new Date(p.date_paiement).getFullYear() === Number(this.selectedYear))
       .reduce((s, p) => s + Number(p.montant), 0);
     return sum * 0.90;
@@ -88,9 +90,15 @@ export class FicheProprietaireComponent implements OnInit {
     return this.contrats.filter(c => c.statut === 'RESILIE' || c.statut === 'ARCHIVE').length;
   }
 
+  // Uniquement les contrats LOCATAIRE actifs pour les loyers attendus
+  get actifsContratsLocataires(): number {
+    return this.contrats.filter(c => c.statut === 'ACTIF' && (c as any).type_contrat === 'LOCATAIRE').length;
+  }
+
   get loyerMensuel(): number {
+    // On ne somme que les contrats de LOCATAIRE actifs (ceux qui génèrent un loyer)
     const sum = this.contrats
-      .filter(c => c.statut === 'ACTIF')
+      .filter(c => c.statut === 'ACTIF' && (c as any).type_contrat === 'LOCATAIRE')
       .reduce((s, c) => s + Number(c.montant), 0);
     return sum * 0.90;
   }
@@ -101,14 +109,14 @@ export class FicheProprietaireComponent implements OnInit {
 
   get dernierPaiement(): any {
     const sorted = [...this.paiements]
-      .filter(p => this.isPaye(p.statut) || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => this.isPaye(p.statut))
       .sort((a, b) => new Date(b.date_paiement).getTime() - new Date(a.date_paiement).getTime());
     return sorted.length > 0 ? sorted[0] : null;
   }
 
   get dernierReversement(): any {
     const sorted = [...this.paiements]
-      .filter(p => this.isPaye(p.statut) || String(p.statut).toLowerCase() === 'partiel')
+      .filter(p => this.isPaye(p.statut))
       .sort((a, b) => new Date(b.date_paiement).getTime() - new Date(a.date_paiement).getTime());
     return sorted.length > 0 ? sorted[0] : null;
   }
@@ -141,12 +149,28 @@ export class FicheProprietaireComponent implements OnInit {
     this.contratService.getAll().subscribe({
       next: (res: any) => {
         const tousLesContrats = res.data.data || res.data;
-        this.contrats = tousLesContrats.filter((c: any) => c.id_proprietaire === proprietaireId || (c.bien && c.bien.id_proprietaire === proprietaireId));
-        
+        this.contrats = tousLesContrats.filter((c: any) =>
+          c.id_proprietaire === proprietaireId ||
+          (c.bien && c.bien.id_proprietaire === proprietaireId)
+        );
+
+        // Charger les paiements de chaque contrat via l'endpoint dédié
         this.paiements = [];
         this.contrats.forEach((c: any) => {
-          if (c.paiements) {
-            this.paiements.push(...c.paiements);
+          // D'abord utiliser les paiements déjà inclus si disponibles
+          if (c.paiements && c.paiements.length > 0) {
+            // Enrichir chaque paiement avec la référence du contrat
+            const enriched = c.paiements.map((p: any) => ({ ...p, contrat: c }));
+            this.paiements.push(...enriched);
+          } else {
+            // Sinon appel API dédié
+            this.contratService.getPaiements(c.id_contrat).subscribe({
+              next: (r: any) => {
+                const paiementsContrat = r.data || [];
+                const enriched = paiementsContrat.map((p: any) => ({ ...p, contrat: c }));
+                this.paiements.push(...enriched);
+              }
+            });
           }
         });
       }
@@ -205,3 +229,4 @@ export class FicheProprietaireComponent implements OnInit {
     this.router.navigate(['/proprietaires']);
   }
 }
+

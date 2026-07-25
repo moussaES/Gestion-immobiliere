@@ -1,12 +1,19 @@
 <div class="login-wrapper">
-  <div class="login-card">
-
-    <div class="login-header">
-      <h1>Étoiles du Sine</h1>
-      <p>Connectez-vous à votre espace</p>
+  <div class="login-split-card">
+    <div class="login-image-side">
+      <div class="login-welcome">
+        <h2>Bienvenue sur GESTIMMO</h2>
+        <p>La solution complète pour la gestion de vos biens immobiliers.</p>
+      </div>
+      <img src="assets/logo.jpeg" alt="GESTIMMO Logo" />
     </div>
+    <div class="login-form-side">
+      <div class="login-header">
+        <h1>GESTIMMO</h1>
+        <p>Connectez-vous à votre espace</p>
+      </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
       <div class="form-group">
         <label>Adresse email</label>
@@ -32,10 +39,11 @@
 
       <div class="alert alert-danger" *ngIf="erreur">{{ erreur }}</div>
 
-      <button type="submit" class="btn-login" [disabled]="loading">
-        {{ loading ? 'Connexion...' : 'Se connecter' }}
-      </button>
+        <button type="submit" class="btn-login" [disabled]="loading">
+          {{ loading ? 'Connexion...' : 'Se connecter' }}
+        </button>
 
-    </form>
+      </form>
+    </div>
   </div>
 </div>

@@ -2,116 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Proprietaire;
 use App\Http\Requests\StoreProprietaireRequest;
 use App\Http\Requests\UpdateProprietaireRequest;
 use App\Http\Resources\ProprietaireResource;
+use App\Services\ProprietaireService;
 use Illuminate\Http\Request;
 
 class ProprietaireController extends Controller
 {
+    protected ProprietaireService $proprietaireService;
+
+    public function __construct(ProprietaireService $proprietaireService)
+    {
+        $this->proprietaireService = $proprietaireService;
+    }
+
     public function index()
     {
-        try {
-            $proprietaires = Proprietaire::with('biens', 'contrats')->withCount('biens')->paginate(15);
-            return response()->json([
-                'success' => true,
-                'data' => ProprietaireResource::collection($proprietaires)->response()->getData(true),
-                'message' => 'Liste des propriétaires récupérée avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        $proprietaires = $this->proprietaireService->getAllPaginated();
+        
+        return response()->json([
+            'success' => true,
+            'data' => ProprietaireResource::collection($proprietaires)->response()->getData(true),
+            'message' => 'Liste des propriétaires récupérée avec succès'
+        ]);
     }
 
     public function show($id)
     {
-        try {
-            $proprietaire = Proprietaire::with('biens', 'contrats')->findOrFail($id);
-            return response()->json([
-                'success' => true,
-                'data' => new ProprietaireResource($proprietaire),
-                'message' => 'Propriétaire récupéré avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Propriétaire non trouvé'], 404);
-        }
+        $proprietaire = $this->proprietaireService->getById($id);
+        
+        return response()->json([
+            'success' => true,
+            'data' => new ProprietaireResource($proprietaire),
+            'message' => 'Propriétaire récupéré avec succès'
+        ]);
     }
 
     public function store(StoreProprietaireRequest $request)
     {
-        try {
-            $validated = $request->validated();
-            $proprietaire = Proprietaire::create($validated);
+        $proprietaire = $this->proprietaireService->create($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'data' => new ProprietaireResource($proprietaire),
-                'message' => 'Propriétaire créé avec succès'
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => new ProprietaireResource($proprietaire),
+            'message' => 'Propriétaire créé avec succès'
+        ], 201);
     }
 
     public function update(UpdateProprietaireRequest $request, $id)
     {
-        try {
-            $proprietaire = Proprietaire::findOrFail($id);
-            $validated = $request->validated();
-            $proprietaire->update($validated);
+        $proprietaire = $this->proprietaireService->update($id, $request->validated());
 
-            return response()->json([
-                'success' => true,
-                'data' => new ProprietaireResource($proprietaire),
-                'message' => 'Propriétaire mis à jour avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => new ProprietaireResource($proprietaire),
+            'message' => 'Propriétaire mis à jour avec succès'
+        ]);
     }
 
     public function destroy($id)
     {
-        try {
-            $proprietaire = Proprietaire::findOrFail($id);
-            $proprietaire->delete();
+        $this->proprietaireService->delete($id);
 
-            return response()->json(['success' => true, 'message' => 'Propriétaire supprimé avec succès']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json(['success' => true, 'message' => 'Propriétaire supprimé avec succès']);
     }
 
     public function biens($id)
     {
-        try {
-            $proprietaire = Proprietaire::findOrFail($id);
-            $biens = $proprietaire->biens()->get();
+        $biens = $this->proprietaireService->getBiens($id);
 
-            return response()->json([
-                'success' => true,
-                'data' => $biens, // Potentiellement à paginer et resourcer plus tard
-                'message' => 'Biens du propriétaire récupérés avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => $biens,
+            'message' => 'Biens du propriétaire récupérés avec succès'
+        ]);
     }
 
     public function contrats($id)
     {
-        try {
-            $proprietaire = Proprietaire::findOrFail($id);
-            $contrats = $proprietaire->contrats()->get();
+        $contrats = $this->proprietaireService->getContrats($id);
 
-            return response()->json([
-                'success' => true,
-                'data' => $contrats,
-                'message' => 'Contrats du propriétaire récupérés avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => $contrats,
+            'message' => 'Contrats du propriétaire récupérés avec succès'
+        ]);
     }
 }

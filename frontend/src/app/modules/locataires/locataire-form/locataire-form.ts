@@ -34,7 +34,7 @@ export class LocataireFormComponent implements OnInit {
       email:      ['', [Validators.required, Validators.email]],
       adresse:    ['', Validators.required],
       profession: ['', Validators.required],
-      cni:        ['', Validators.required],
+      cni:        ['', [Validators.required, Validators.pattern(/^\d{17}$/)]],
     });
   }
 

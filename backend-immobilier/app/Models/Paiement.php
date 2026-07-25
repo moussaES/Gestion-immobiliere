@@ -24,6 +24,7 @@ class Paiement extends Model
         'id_contrat',
         'id_user_enregistrement',
         'notes',
+        'mois_concerne',
     ];
 
     protected $casts = [

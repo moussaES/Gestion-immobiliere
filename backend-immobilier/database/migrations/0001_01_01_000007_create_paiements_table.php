@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('date_paiement');
             $table->decimal('montant', 12, 2);
             $table->enum('mode_paiement', ['CHEQUE', 'VIREMENT', 'ESPECES', 'WAVE', 'ORANGE_MONEY']);
-            $table->enum('statut', ['PAYE', 'PARTIEL', 'EN_ATTENTE'])->default('EN_ATTENTE');
+            $table->enum('statut', ['PAYE', 'IMPAYE', 'EN_ATTENTE'])->default('EN_ATTENTE');
             
             // Foreign Keys
             $table->unsignedBigInteger('id_contrat');

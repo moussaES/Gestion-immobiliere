@@ -2,114 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Locataire;
 use App\Http\Requests\StoreLocataireRequest;
 use App\Http\Requests\UpdateLocataireRequest;
 use App\Http\Resources\LocataireResource;
+use App\Services\LocataireService;
 use Illuminate\Http\Request;
 
 class LocataireController extends Controller
 {
+    protected LocataireService $locataireService;
+
+    public function __construct(LocataireService $locataireService)
+    {
+        $this->locataireService = $locataireService;
+    }
+
     public function index()
     {
-        try {
-            $locataires = Locataire::with('contrats')->paginate(15);
-            return response()->json([
-                'success' => true,
-                'data' => LocataireResource::collection($locataires)->response()->getData(true),
-                'message' => 'Liste des locataires récupérée avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        $locataires = $this->locataireService->getAllPaginated();
+
+        return response()->json([
+            'success' => true,
+            'data' => LocataireResource::collection($locataires)->response()->getData(true),
+            'message' => 'Liste des locataires récupérée avec succès'
+        ]);
     }
 
     public function show($id)
     {
-        try {
-            $locataire = Locataire::with('contrats')->findOrFail($id);
-            return response()->json([
-                'success' => true,
-                'data' => new LocataireResource($locataire),
-                'message' => 'Locataire récupéré avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Locataire non trouvé'], 404);
-        }
+        $locataire = $this->locataireService->getById($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => new LocataireResource($locataire),
+            'message' => 'Locataire récupéré avec succès'
+        ]);
     }
 
     public function store(StoreLocataireRequest $request)
     {
-        try {
-            $validated = $request->validated();
-            $locataire = Locataire::create($validated);
+        $locataire = $this->locataireService->create($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'data' => new LocataireResource($locataire),
-                'message' => 'Locataire créé avec succès'
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => new LocataireResource($locataire),
+            'message' => 'Locataire créé avec succès'
+        ], 201);
     }
 
     public function update(UpdateLocataireRequest $request, $id)
     {
-        try {
-            $locataire = Locataire::findOrFail($id);
-            $validated = $request->validated();
-            $locataire->update($validated);
+        $locataire = $this->locataireService->update($id, $request->validated());
 
-            return response()->json([
-                'success' => true,
-                'data' => new LocataireResource($locataire),
-                'message' => 'Locataire mis à jour avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => new LocataireResource($locataire),
+            'message' => 'Locataire mis à jour avec succès'
+        ]);
     }
 
     public function destroy($id)
     {
-        try {
-            $locataire = Locataire::findOrFail($id);
-            $locataire->delete();
+        $this->locataireService->delete($id);
 
-            return response()->json(['success' => true, 'message' => 'Locataire supprimé avec succès']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json(['success' => true, 'message' => 'Locataire supprimé avec succès']);
     }
 
     public function contrats($id)
     {
-        try {
-            $locataire = Locataire::findOrFail($id);
-            $contrats = $locataire->contrats()->get();
+        $contrats = $this->locataireService->getContrats($id);
 
-            return response()->json([
-                'success' => true,
-                'data' => $contrats,
-                'message' => 'Contrats du locataire récupérés avec succès'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => $contrats,
+            'message' => 'Contrats du locataire récupérés avec succès'
+        ]);
     }
 
     public function byProfession($profession)
     {
-        try {
-            $locataires = Locataire::where('profession', $profession)->paginate(15);
-            return response()->json([
-                'success' => true,
-                'data' => LocataireResource::collection($locataires)->response()->getData(true),
-                'message' => "Locataires avec la profession {$profession} récupérés"
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        $locataires = $this->locataireService->getByProfession($profession);
+
+        return response()->json([
+            'success' => true,
+            'data' => LocataireResource::collection($locataires)->response()->getData(true),
+            'message' => "Locataires avec la profession {$profession} récupérés"
+        ]);
     }
 }

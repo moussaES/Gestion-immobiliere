@@ -4,12 +4,15 @@ import { DashboardStats } from '../../../core/models';
 
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ApiResponse } from '../../../core/models';import { AuthService } from '../../../core/services/auth.service';
+import { ApiResponse } from '../../../core/models';
+import { AuthService } from '../../../core/services/auth.service';
+import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
-  imports: [CommonModule, RouterModule],
+  standalone: true,
+  imports: [CommonModule, RouterModule, StatCardComponent],
 })
 export class DashboardComponent implements OnInit {
   stats: DashboardStats | null = null;
