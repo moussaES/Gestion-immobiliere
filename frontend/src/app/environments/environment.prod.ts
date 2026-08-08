@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://votre-domaine.com/api',
+  apiUrl: 'https://gestion-immobiliere-z07p.onrender.com',
 };
