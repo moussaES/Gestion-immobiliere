@@ -215,6 +215,28 @@ Route::middleware('api')->group(function () {
         Route::delete('{id}', [App\Http\Controllers\TravailController::class, 'destroy']);
     });
 
+    // ====================================================================
+    // Routes: PRESTATAIRES
+    // ====================================================================
+    Route::prefix('prestataires')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PrestaireController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\PrestaireController::class, 'store']);
+        Route::get('{id}', [\App\Http\Controllers\PrestaireController::class, 'show']);
+        Route::put('{id}', [\App\Http\Controllers\PrestaireController::class, 'update']);
+        Route::delete('{id}', [\App\Http\Controllers\PrestaireController::class, 'destroy']);
+    });
+
+    // ====================================================================
+    // Routes: DEPENSES
+    // ====================================================================
+    Route::prefix('depenses')->group(function () {
+        Route::get('/', [\App\Http\Controllers\DepenseController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\DepenseController::class, 'store']);
+        Route::get('{id}', [\App\Http\Controllers\DepenseController::class, 'show']);
+        Route::put('{id}', [\App\Http\Controllers\DepenseController::class, 'update']);
+        Route::delete('{id}', [\App\Http\Controllers\DepenseController::class, 'destroy']);
+    });
+
 });
 // ========================================================================
 // Route d'accueil / Health Check

@@ -10,7 +10,7 @@ class TravailController extends Controller
     public function index()
     {
         try {
-            $travaux = Travail::with(['bien', 'locataire', 'proprietaire'])->get();
+            $travaux = Travail::with(['bien', 'locataire', 'proprietaire', 'prestataire'])->get();
             return response()->json([
                 'success' => true,
                 'data' => $travaux,
@@ -36,6 +36,7 @@ class TravailController extends Controller
                 'id_bien' => 'required|exists:biens,id_bien',
                 'id_locataire' => 'nullable|exists:locataires,id_locataire',
                 'id_proprietaire' => 'nullable|exists:proprietaires,id_proprietaire',
+                'id_prestataire' => 'nullable|exists:prestataires,id_prestataire',
             ]);
 
             $travail = Travail::create($validated);
@@ -56,7 +57,7 @@ class TravailController extends Controller
     public function show($id)
     {
         try {
-            $travail = Travail::with(['bien', 'locataire', 'proprietaire'])->findOrFail($id);
+            $travail = Travail::with(['bien', 'locataire', 'proprietaire', 'prestataire'])->findOrFail($id);
             return response()->json([
                 'success' => true,
                 'data' => $travail
@@ -83,6 +84,7 @@ class TravailController extends Controller
                 'id_bien' => 'sometimes|exists:biens,id_bien',
                 'id_locataire' => 'nullable|exists:locataires,id_locataire',
                 'id_proprietaire' => 'nullable|exists:proprietaires,id_proprietaire',
+                'id_prestataire' => 'nullable|exists:prestataires,id_prestataire',
             ]);
 
             $travail->update($validated);

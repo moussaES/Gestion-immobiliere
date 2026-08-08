@@ -184,6 +184,66 @@ export const routes: Routes = [
         loadComponent: () => import('./modules/documents/documents.component').then(m => m.DocumentsComponent)
       },
       {
+        path: 'prestataires',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/prestataires/prestataires').then(m => m.PrestatairesComponent)
+      },
+      {
+        path: 'prestataires/nouveau',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/prestataires/prestataire-form/prestataire-form').then(m => m.PrestataireFormComponent)
+      },
+      {
+        path: 'prestataires/modifier/:id',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/prestataires/prestataire-form/prestataire-form').then(m => m.PrestataireFormComponent)
+      },
+      {
+        path: 'depenses',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/depenses/depenses').then(m => m.DepensesComponent)
+      },
+      {
+        path: 'depenses/nouveau',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/depenses/depense-form/depense-form').then(m => m.DepenseFormComponent)
+      },
+      {
+        path: 'depenses/modifier/:id',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/depenses/depense-form/depense-form').then(m => m.DepenseFormComponent)
+      },
+      {
+        path: 'travaux',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/travaux/travaux').then(m => m.TravauxComponent)
+      },
+      {
+        path: 'travaux/nouveau',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/travaux/travail-form/travail-form').then(m => m.TravailFormComponent)
+      },
+      {
+        path: 'travaux/modifier/:id',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/travaux/travail-form/travail-form').then(m => m.TravailFormComponent)
+      },
+      {
+        path: 'travaux/:id',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'GESTIONNAIRE'] },
+        loadComponent: () => import('./modules/travaux/fiche-travail/fiche-travail').then(m => m.FicheTravailComponent)
+      },
+      {
         path: 'parametres',
         loadComponent: () => import('./modules/parametres/parametres').then(m => m.ParametresComponent)
       },

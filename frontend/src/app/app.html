@@ -46,6 +46,15 @@
       <a *ngIf="isGestionnaireOrAdmin()" routerLink="/paiements" routerLinkActive="active">
         <span class="icon">💰</span> <span class="nav-text">Paiements</span>
       </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/prestataires" routerLinkActive="active">
+        <span class="icon">👷</span> <span class="nav-text">Prestataires</span>
+      </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/depenses" routerLinkActive="active">
+        <span class="icon">📉</span> <span class="nav-text">Dépenses</span>
+      </a>
+      <a *ngIf="isGestionnaireOrAdmin()" routerLink="/travaux" routerLinkActive="active">
+        <span class="icon">🛠️</span> <span class="nav-text">Travaux</span>
+      </a>
       <a routerLink="/documents" routerLinkActive="active">
         <span class="icon">📂</span> <span class="nav-text">Documents</span>
       </a>

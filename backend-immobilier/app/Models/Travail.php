@@ -21,7 +21,8 @@ class Travail extends Model
         'statut',
         'id_bien',
         'id_locataire',
-        'id_proprietaire'
+        'id_proprietaire',
+        'id_prestataire'
     ];
 
     protected $casts = [
@@ -42,5 +43,10 @@ class Travail extends Model
     public function proprietaire()
     {
         return $this->belongsTo(Proprietaire::class, 'id_proprietaire', 'id_proprietaire');
+    }
+
+    public function prestataire()
+    {
+        return $this->belongsTo(Prestataire::class, 'id_prestataire', 'id_prestataire');
     }
 }

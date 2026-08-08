@@ -7,4 +7,6 @@ export * from './paiement.model';
 export * from './historique.model';
 export * from './document.model';
 export * from './travail.model';
+export * from './prestataire.model';
+export * from './depense.model';
 export * from './api-response.model';
