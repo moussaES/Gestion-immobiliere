@@ -22,8 +22,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copy application backend files
 COPY backend-immobilier/ .
 
-# Copy .env.example to .env as fallback
-RUN cp -n .env.example .env || true
+# Copy .env.example to .env
+RUN cp .env.example .env
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
