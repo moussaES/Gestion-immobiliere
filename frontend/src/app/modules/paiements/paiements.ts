@@ -31,6 +31,11 @@ import { Paiement } from '../../core/models';
             <option value="EN_ATTENTE">En attente</option>
             <option value="IMPAYE">Impayé</option>
           </select>
+          <label>Mois</label>
+          <select [(ngModel)]="moisFilter" (change)="filterData()">
+            <option value="">Tous les mois</option>
+            <option *ngFor="let m of availableMois" [value]="m">{{ m }}</option>
+          </select>
           <label>Taille</label>
           <select [(ngModel)]="pageSize" (change)="currentPage = 1">
             <option [ngValue]="5">5</option>
@@ -160,6 +165,17 @@ export class PaiementsComponent implements OnInit {
   
   searchTerm = '';
   statutFilter = '';
+  moisFilter = '';
+
+  get availableMois(): string[] {
+    const set = new Set<string>();
+    this.paiements.forEach(p => {
+      if (p.mois_concerne) {
+        set.add(p.mois_concerne);
+      }
+    });
+    return Array.from(set);
+  }
 
   constructor(
     private paiementSvc: PaiementService,
@@ -188,11 +204,13 @@ export class PaiementsComponent implements OnInit {
   filterData(): void {
     this.filteredPaiements = this.paiements.filter(p => {
       const ref = p.contrat?.reference || '';
+      const locataireName = p.contrat?.locataire ? `${p.contrat.locataire.prenom} ${p.contrat.locataire.nom}` : '';
       const matchSearch = this.searchTerm ? 
-        ref.toLowerCase().includes(this.searchTerm.toLowerCase()) 
+        (ref.toLowerCase().includes(this.searchTerm.toLowerCase()) || locataireName.toLowerCase().includes(this.searchTerm.toLowerCase()))
         : true;
       const matchStatut = this.statutFilter ? p.statut === this.statutFilter : true;
-      return matchSearch && matchStatut;
+      const matchMois = this.moisFilter ? (p.mois_concerne && p.mois_concerne.toLowerCase().includes(this.moisFilter.toLowerCase())) : true;
+      return matchSearch && matchStatut && matchMois;
     });
     this.currentPage = 1;
   }

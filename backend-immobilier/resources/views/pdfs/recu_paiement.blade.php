@@ -59,7 +59,7 @@
             </tr>
             <tr>
                 <td><strong>Mois concerné :</strong></td>
-                <td>{{ \Carbon\Carbon::parse($paiement->mois_concerne)->format('m/Y') }}</td>
+                <td>{{ $paiement->mois_concerne }}</td>
             </tr>
             <tr>
                 <td><strong>Référence du paiement :</strong></td>

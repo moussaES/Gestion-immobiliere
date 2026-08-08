@@ -23,7 +23,9 @@ class PaiementService
     public function create(array $data)
     {
         $paiement = Paiement::create($data);
-        $this->generatePdfReceipt($paiement);
+        if ($paiement->statut === 'PAYE') {
+            $this->generatePdfReceipt($paiement);
+        }
         return $paiement;
     }
 
@@ -31,12 +33,17 @@ class PaiementService
     {
         $paiement = Paiement::findOrFail($id);
         $paiement->update($data);
+        if ($paiement->statut === 'PAYE') {
+            $this->generatePdfReceipt($paiement);
+        }
         return $paiement;
     }
 
     public function delete(int $id)
     {
         $paiement = Paiement::findOrFail($id);
+        // Supprimer également le document de reçu s'il existe
+        Document::where('id_paiement', $id)->delete();
         return $paiement->delete();
     }
 
@@ -143,6 +150,10 @@ class PaiementService
 
     public function generatePdfReceipt(Paiement $paiement)
     {
+        if ($paiement->statut !== 'PAYE') {
+            return;
+        }
+
         try {
             $paiement->load('contrat.bien.proprietaire', 'contrat.locataire', 'contrat.proprietaire');
             $contrat = $paiement->contrat;
