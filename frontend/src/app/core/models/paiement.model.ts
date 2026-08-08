@@ -1,5 +1,5 @@
-export type ModePaiement   = 'especes' | 'virement' | 'cheque' | 'wave' | 'orange_money';
-export type StatutPaiement = 'paye' | 'en_attente' | 'impaye' | 'retard';
+export type ModePaiement   = 'especes' | 'virement' | 'cheque' | 'wave' | 'orange_money' | 'ESPECES' | 'VIREMENT' | 'CHEQUE' | 'WAVE' | 'ORANGE_MONEY';
+export type StatutPaiement = 'paye' | 'en_attente' | 'impaye' | 'retard' | 'PAYE' | 'EN_ATTENTE' | 'IMPAYE' | string;
 
 export interface Paiement {
   id_paiement?:     number;

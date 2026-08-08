@@ -11,6 +11,7 @@ class PaiementService
 {
     public function getAllPaginated(int $perPage = 15)
     {
+        $this->genererPaiementsMensuelsEtMettreAJourImpayes();
         return Paiement::with('contrat.bien', 'contrat.locataire', 'contrat.proprietaire', 'utilisateur')->paginate($perPage);
     }
 
@@ -59,13 +60,72 @@ class PaiementService
         return Paiement::byMois($mois)->paginate($perPage);
     }
 
+    public function genererPaiementsMensuelsEtMettreAJourImpayes()
+    {
+        $currentMonth = \Carbon\Carbon::now()->month;
+        $currentYear = \Carbon\Carbon::now()->year;
+        
+        $moisNoms = [
+            1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril', 5 => 'mai', 6 => 'juin',
+            7 => 'juillet', 8 => 'août', 9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre'
+        ];
+        $moisLibelle = ($moisNoms[$currentMonth] ?? '') . ' ' . $currentYear;
+
+        // 1. Basculer les anciens paiements en attente des mois précédents en IMPAYE
+        Paiement::where('statut', 'EN_ATTENTE')
+            ->whereDate('date_paiement', '<', \Carbon\Carbon::now()->startOfMonth())
+            ->update(['statut' => 'IMPAYE']);
+
+        // 2. Générer les nouveaux paiements pour le mois en cours pour chaque contrat locataire ACTIF
+        $contratsActifs = \App\Models\Contrat::where('statut', 'ACTIF')
+            ->where('type_contrat', 'LOCATAIRE')
+            ->get();
+
+        foreach ($contratsActifs as $contrat) {
+            $existe = Paiement::where('id_contrat', $contrat->id_contrat)
+                ->whereYear('date_paiement', $currentYear)
+                ->whereMonth('date_paiement', $currentMonth)
+                ->exists();
+
+            if (!$existe) {
+                Paiement::create([
+                    'reference' => 'PAY-' . date('Ym') . '-' . str_pad($contrat->id_contrat, 3, '0', STR_PAD_LEFT) . '-' . rand(10, 99),
+                    'date_paiement' => \Carbon\Carbon::now()->startOfMonth()->toDateString(),
+                    'montant' => $contrat->montant,
+                    'mode_paiement' => 'ESPECES',
+                    'statut' => 'EN_ATTENTE',
+                    'id_contrat' => $contrat->id_contrat,
+                    'mois_concerne' => $moisLibelle,
+                    'notes' => 'Génération automatique du 1er du mois',
+                ]);
+            }
+        }
+    }
+
+    public function validerPaiement(int $id, ?string $modePaiement = null)
+    {
+        $paiement = Paiement::findOrFail($id);
+        $updateData = [
+            'statut' => 'PAYE',
+            'date_paiement' => \Carbon\Carbon::now()->toDateString()
+        ];
+        if ($modePaiement) {
+            $updateData['mode_paiement'] = $modePaiement;
+        }
+        $paiement->update($updateData);
+        $this->generatePdfReceipt($paiement);
+        return $paiement;
+    }
+
     public function getStatistiques()
     {
+        $this->genererPaiementsMensuelsEtMettreAJourImpayes();
+
         return [
             'total_paiements' => Paiement::sum('montant'),
             'nombre_paiements' => Paiement::count(),
             'paiements_payes' => Paiement::paye()->sum('montant'),
-            'paiements_en_attente' => Paiement::enAttente()->sum('montant'),
+            'paiements_en_attente' => Paiement::whereIn('statut', ['EN_ATTENTE', 'IMPAYE'])->sum('montant'),
             'paiements_partiels' => Paiement::partiel()->sum('montant'),
         ];
     }

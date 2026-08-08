@@ -116,6 +116,7 @@ Route::middleware('api')->group(function () {
         Route::get('/', [PaiementController::class, 'index']);                       // GET /api/paiements
         Route::post('/', [PaiementController::class, 'store']);                      // POST /api/paiements
         Route::get('{id}', [PaiementController::class, 'show']);                     // GET /api/paiements/{id}
+        Route::post('{id}/valider', [PaiementController::class, 'valider']);          // POST /api/paiements/{id}/valider
         Route::put('{id}', [PaiementController::class, 'update']);                   // PUT /api/paiements/{id}
         Route::delete('{id}', [PaiementController::class, 'destroy']);               // DELETE /api/paiements/{id}
     });
@@ -141,7 +142,9 @@ Route::middleware('api')->group(function () {
     // Routes: DASHBOARD STATISTIQUES
     // ====================================================================
     Route::get('statistiques', function () {
-        // ... (conservé en l'état)
+        // Auto-génération des paiements du mois et maj des impayés
+        app(\App\Services\PaiementService::class)->genererPaiementsMensuelsEtMettreAJourImpayes();
+
         $total_biens = \App\Models\Bien::count();
         $biens_libres = \App\Models\Bien::where('statut', 'libre')->count();
         $biens_occupes = \App\Models\Bien::where('statut', 'occupe')->count();
@@ -151,7 +154,7 @@ Route::middleware('api')->group(function () {
         $revenu_mensuel = \App\Models\Paiement::whereMonth('date_paiement', date('m'))
                             ->whereYear('date_paiement', date('Y'))
                             ->where('statut', 'PAYE')->sum('montant');
-        $paiements_en_attente = \App\Models\Paiement::where('statut', 'EN_ATTENTE')->sum('montant');
+        $paiements_en_attente = \App\Models\Paiement::whereIn('statut', ['EN_ATTENTE', 'IMPAYE'])->sum('montant');
         $taux_occupation = $total_biens > 0 ? round(($biens_occupes / $total_biens) * 100, 2) : 0;
 
         // Nouvelles statistiques:

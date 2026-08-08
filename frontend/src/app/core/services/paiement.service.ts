@@ -27,4 +27,7 @@ export class PaiementService {
   getParModePaiement(): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/par-mode-paiement`);
   }
+  validerPaiement(id: number, modePaiement?: string): Observable<ApiResponse<Paiement>> {
+    return this.http.post<ApiResponse<Paiement>>(`${this.apiUrl}/${id}/valider`, { mode_paiement: modePaiement });
+  }
 }

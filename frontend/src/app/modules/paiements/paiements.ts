@@ -65,8 +65,14 @@ import { Paiement } from '../../core/models';
               <td>{{ p.mode_paiement }}</td>
               <td><span class="badge" [ngClass]="getBadgeClass(p.statut)">{{ p.statut }}</span></td>
               <td class="actions">
-                <a [routerLink]="['/paiements', p.id_paiement]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
-                <a [routerLink]="['/paiements/modifier', p.id_paiement]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
+                <button *ngIf="canValidate(p.statut)" 
+                        (click)="validerPaiement(p)" 
+                        class="btn-validate-inline" 
+                        title="Valider le paiement">
+                  <i class="fas fa-check"></i> Valider
+                </button>
+                <a [routerLink]="['/paiements', p.id_paiement]" class="icon-btn view-btn" title="Voir"><i class="fas fa-eye"></i></a>
+                <a [routerLink]="['/paiements/modifier', p.id_paiement]" class="icon-btn edit-btn" title="Modifier"><i class="fas fa-pencil-alt"></i></a>
               </td>
             </tr>
             <tr *ngIf="filteredPaiements.length === 0">
@@ -122,6 +128,12 @@ import { Paiement } from '../../core/models';
     .badge-annule { background: #f5f5f5; color: #757575; }
     
     .actions { text-align: right; }
+    .btn-validate-inline {
+      background: #2e7d32; color: #fff; border: none; padding: 4px 10px;
+      border-radius: 4px; font-weight: 600; font-size: 12px; cursor: pointer;
+      margin-right: 6px; transition: background 0.2s;
+    }
+    .btn-validate-inline:hover { background: #1b5e20; }
     .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; text-decoration: none; transition: background 0.2s; margin-left: 8px; }
     .edit-btn { color: #f57c00; }
     .edit-btn:hover { background: rgba(245, 124, 0, 0.1); }
@@ -204,5 +216,27 @@ export class PaiementsComponent implements OnInit {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     return d.toLocaleDateString('fr-FR');
+  }
+
+  canValidate(statut?: string): boolean {
+    if (!statut) return false;
+    const s = statut.toUpperCase();
+    return s === 'EN_ATTENTE' || s === 'IMPAYE';
+  }
+
+  validerPaiement(p: Paiement): void {
+    if (!p.id_paiement) return;
+    if (confirm(`Confirmer la réception du paiement de ${p.montant} FCFA pour ${p.mois_concerne} ?`)) {
+      this.paiementSvc.validerPaiement(p.id_paiement).subscribe({
+        next: () => {
+          this.toastSvc.success('Paiement validé avec succès ! Reçu PDF généré.');
+          this.chargerPaiements();
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastSvc.error('Erreur lors de la validation du paiement');
+        }
+      });
+    }
   }
 }

@@ -61,6 +61,18 @@ class PaiementController extends Controller
         ]);
     }
 
+    public function valider(Request $request, $id)
+    {
+        $modePaiement = $request->input('mode_paiement');
+        $paiement = $this->paiementService->validerPaiement($id, $modePaiement);
+
+        return response()->json([
+            'success' => true,
+            'data' => new PaiementResource($paiement),
+            'message' => 'Paiement validé avec succès'
+        ]);
+    }
+
     public function destroy($id)
     {
         $this->paiementService->delete($id);

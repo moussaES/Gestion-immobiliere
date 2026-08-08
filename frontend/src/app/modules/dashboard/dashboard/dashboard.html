@@ -34,8 +34,10 @@
     </app-stat-card>
     
     <app-stat-card 
-      title="PAIEMENTS EN ATTENTE" 
+      title="PAIEMENTS EN ATTENTE / IMPAYÉS" 
       [value]="stats.paiements_en_attente" 
+      [isCurrency]="true"
+      subtitle="Loyers attendus du mois : {{ stats.loyers_attendus | number }} FCFA"
       badge="PA" 
       color="orange">
     </app-stat-card>
