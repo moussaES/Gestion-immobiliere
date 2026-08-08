@@ -22,12 +22,15 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copy application backend files
 COPY backend-immobilier/ .
 
+# Copy .env.example to .env as fallback
+RUN cp -n .env.example .env || true
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
 # Set permissions for storage and bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 777 storage bootstrap/cache
 
 EXPOSE 80
 
