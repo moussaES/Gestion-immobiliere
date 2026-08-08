@@ -130,26 +130,41 @@ class PaiementService
         ];
     }
 
-    private function generatePdfReceipt(Paiement $paiement)
+    public function genererRecusManquantsPourPaiementsPayes()
+    {
+        $paiementsPayes = Paiement::where('statut', 'PAYE')->get();
+        foreach ($paiementsPayes as $p) {
+            $hasDoc = Document::where('id_paiement', $p->id_paiement)->exists();
+            if (!$hasDoc) {
+                $this->generatePdfReceipt($p);
+            }
+        }
+    }
+
+    public function generatePdfReceipt(Paiement $paiement)
     {
         try {
-            $paiement->load('contrat.bien.proprietaire', 'contrat.locataire');
+            $paiement->load('contrat.bien.proprietaire', 'contrat.locataire', 'contrat.proprietaire');
             $contrat = $paiement->contrat;
             $bien = $contrat ? $contrat->bien : null;
-            $proprietaire = $bien ? $bien->proprietaire : null;
+            $proprietaire = $bien ? $bien->proprietaire : ($contrat ? $contrat->proprietaire : null);
             $locataire = $contrat ? $contrat->locataire : null;
 
-            $documentData = new Document([
-                'reference' => 'DOC-' . time() . '-' . rand(1000, 9999),
-                'type' => 'RECU_PAIEMENT',
-                'id_paiement' => $paiement->id_paiement,
-                'id_contrat' => $contrat ? $contrat->id_contrat : null,
-                'id_bien' => $bien ? $bien->id_bien : null,
-                'id_proprietaire' => $proprietaire ? $proprietaire->id_proprietaire : null,
-                'id_locataire' => $locataire ? $locataire->id_locataire : null,
-                'chemin_fichier' => '',
-                'nom_fichier' => 'Recu_Paiement_' . $paiement->reference . '.pdf',
-            ]);
+            $documentData = Document::where('id_paiement', $paiement->id_paiement)->first();
+
+            if (!$documentData) {
+                $documentData = new Document([
+                    'reference' => 'DOC-' . time() . '-' . rand(1000, 9999),
+                    'type' => 'RECU_PAIEMENT',
+                    'id_paiement' => $paiement->id_paiement,
+                    'id_contrat' => $contrat ? $contrat->id_contrat : null,
+                    'id_bien' => $bien ? $bien->id_bien : null,
+                    'id_proprietaire' => $proprietaire ? $proprietaire->id_proprietaire : ($contrat ? $contrat->id_proprietaire : null),
+                    'id_locataire' => $locataire ? $locataire->id_locataire : ($contrat ? $contrat->id_locataire : null),
+                    'chemin_fichier' => '',
+                    'nom_fichier' => 'Recu_Paiement_' . $paiement->reference . '.pdf',
+                ]);
+            }
 
             $pdf = Pdf::loadView('pdfs.recu_paiement', [
                 'paiement' => $paiement,

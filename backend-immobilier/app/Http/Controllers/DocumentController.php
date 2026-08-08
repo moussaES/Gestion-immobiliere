@@ -11,9 +11,21 @@ class DocumentController extends Controller
     public function index()
     {
         try {
-            $documents = Document::with('locataire', 'proprietaire', 'bien', 'contrat', 'paiement')
-                ->orderBy('date_creation', 'desc')
-                ->get();
+            app(\App\Services\PaiementService::class)->genererRecusManquantsPourPaiementsPayes();
+
+            $documents = Document::with([
+                'locataire', 
+                'proprietaire', 
+                'bien', 
+                'contrat.locataire', 
+                'contrat.proprietaire', 
+                'contrat.bien', 
+                'paiement.contrat.locataire',
+                'paiement.contrat.proprietaire',
+                'paiement.contrat.bien'
+            ])
+            ->orderBy('date_creation', 'desc')
+            ->get();
                 
             return response()->json([
                 'success' => true,

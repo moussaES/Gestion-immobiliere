@@ -45,10 +45,31 @@ export class DocumentsComponent implements OnInit {
     this.documentService.download(id);
   }
 
+  getLocataireName(doc: any): string {
+    if (doc.locataire) return `${doc.locataire.prenom} ${doc.locataire.nom}`;
+    if (doc.contrat?.locataire) return `${doc.contrat.locataire.prenom} ${doc.contrat.locataire.nom}`;
+    if (doc.paiement?.contrat?.locataire) return `${doc.paiement.contrat.locataire.prenom} ${doc.paiement.contrat.locataire.nom}`;
+    return '-';
+  }
+
+  getProprietaireName(doc: any): string {
+    if (doc.proprietaire) return `${doc.proprietaire.prenom} ${doc.proprietaire.nom}`;
+    if (doc.contrat?.proprietaire) return `${doc.contrat.proprietaire.prenom} ${doc.contrat.proprietaire.nom}`;
+    if (doc.paiement?.contrat?.proprietaire) return `${doc.paiement.contrat.proprietaire.prenom} ${doc.paiement.contrat.proprietaire.nom}`;
+    return '-';
+  }
+
+  getBienReference(doc: any): string {
+    if (doc.bien?.reference) return doc.bien.reference;
+    if (doc.contrat?.bien?.reference) return doc.contrat.bien.reference;
+    if (doc.paiement?.contrat?.bien?.reference) return doc.paiement.contrat.bien.reference;
+    return '-';
+  }
+
   filterData(): void {
     this.filteredDocuments = this.documents.filter(doc => {
-      const locataireName = doc.locataire ? `${doc.locataire.prenom} ${doc.locataire.nom}`.toLowerCase() : '';
-      const proprietaireName = doc.proprietaire ? `${doc.proprietaire.prenom} ${doc.proprietaire.nom}`.toLowerCase() : '';
+      const locataireName = this.getLocataireName(doc).toLowerCase();
+      const proprietaireName = this.getProprietaireName(doc).toLowerCase();
       const ref = doc.reference?.toLowerCase() || '';
       
       const search = this.searchTerm.toLowerCase();
