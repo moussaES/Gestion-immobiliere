@@ -27,6 +27,7 @@ export class FicheBienComponent implements OnInit {
 
   get moisConcerne(): string {
     const d = new Date();
+    d.setMonth(d.getMonth() - 1);
     return d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   }
 
