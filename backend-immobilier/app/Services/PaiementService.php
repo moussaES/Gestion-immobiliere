@@ -69,41 +69,42 @@ class PaiementService
 
     public function genererPaiementsMensuelsEtMettreAJourImpayes()
     {
-        $currentMonth = \Carbon\Carbon::now()->month;
-        $currentYear = \Carbon\Carbon::now()->year;
+        $now = \Carbon\Carbon::now();
+        $previousMonthDate = $now->copy()->subMonth();
         
         $moisNoms = [
             1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril', 5 => 'mai', 6 => 'juin',
             7 => 'juillet', 8 => 'août', 9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre'
         ];
-        $moisLibelle = ($moisNoms[$currentMonth] ?? '') . ' ' . $currentYear;
+        
+        // Exemple : Le 1er septembre, on génère les paiements en attente du mois d'août
+        $moisLibelle = ($moisNoms[$previousMonthDate->month] ?? '') . ' ' . $previousMonthDate->year;
 
-        // 1. Basculer les anciens paiements en attente des mois précédents en IMPAYE
+        // 1. Basculer les paiements en attente des mois précédents en IMPAYE (ex: le 1er octobre pour le loyer d'août non réglé)
         Paiement::where('statut', 'EN_ATTENTE')
-            ->whereDate('date_paiement', '<', \Carbon\Carbon::now()->startOfMonth())
+            ->whereDate('date_paiement', '<', $now->copy()->startOfMonth())
             ->update(['statut' => 'IMPAYE']);
 
-        // 2. Générer les nouveaux paiements pour le mois en cours pour chaque contrat locataire ACTIF
+        // 2. Générer les nouveaux paiements pour le mois écoulé pour chaque contrat locataire ACTIF
         $contratsActifs = \App\Models\Contrat::where('statut', 'ACTIF')
             ->where('type_contrat', 'LOCATAIRE')
             ->get();
 
         foreach ($contratsActifs as $contrat) {
             $existe = Paiement::where('id_contrat', $contrat->id_contrat)
-                ->whereYear('date_paiement', $currentYear)
-                ->whereMonth('date_paiement', $currentMonth)
+                ->where('mois_concerne', $moisLibelle)
                 ->exists();
 
             if (!$existe) {
                 Paiement::create([
                     'reference' => 'PAY-' . date('Ym') . '-' . str_pad($contrat->id_contrat, 3, '0', STR_PAD_LEFT) . '-' . rand(10, 99),
-                    'date_paiement' => \Carbon\Carbon::now()->startOfMonth()->toDateString(),
+                    'date_paiement' => $now->copy()->startOfMonth()->toDateString(),
                     'montant' => $contrat->montant,
                     'mode_paiement' => 'ESPECES',
                     'statut' => 'EN_ATTENTE',
                     'id_contrat' => $contrat->id_contrat,
                     'mois_concerne' => $moisLibelle,
-                    'notes' => 'Génération automatique du 1er du mois',
+                    'notes' => 'Génération automatique du 1er du mois pour le mois de ' . $moisLibelle,
                 ]);
             }
         }
