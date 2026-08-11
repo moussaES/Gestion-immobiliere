@@ -91,12 +91,28 @@ class ContratService
         return Contrat::where('type_contrat', $type)->paginate($perPage);
     }
 
+    public function genererDocumentsContratsManquants()
+    {
+        $contrats = Contrat::all();
+        foreach ($contrats as $c) {
+            $doc = Document::where('id_contrat', $c->id_contrat)->first();
+            if (!$doc || !Storage::disk('public')->exists($doc->chemin_fichier)) {
+                $this->generateAndSaveDocument($c->id_contrat);
+            }
+        }
+    }
+
     public function generateAndSaveDocument(int $id)
     {
         try {
             $contrat = Contrat::with(['bien', 'proprietaire', 'locataire', 'utilisateur'])->findOrFail($id);
             $pdf = Pdf::loadView('exports.contrat', compact('contrat'));
             $filename = "contrat_{$contrat->reference}.pdf";
+            
+            if (!Storage::disk('public')->exists('documents/contrats')) {
+                Storage::disk('public')->makeDirectory('documents/contrats');
+            }
+
             $path = "documents/contrats/{$filename}";
             
             Storage::disk('public')->put($path, $pdf->output());

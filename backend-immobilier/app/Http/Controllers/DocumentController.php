@@ -12,6 +12,7 @@ class DocumentController extends Controller
     {
         try {
             app(\App\Services\PaiementService::class)->genererRecusManquantsPourPaiementsPayes();
+            app(\App\Services\ContratService::class)->genererDocumentsContratsManquants();
 
             $documents = Document::with([
                 'locataire', 
@@ -70,9 +71,16 @@ class DocumentController extends Controller
             
             // Si le fichier PDF est manquant sur le disque (ex: redémarrage conteneur), le régénérer automatiquement à la volée !
             if (empty($document->chemin_fichier) || !Storage::disk('public')->exists($document->chemin_fichier)) {
-                if ($document->paiement && $document->paiement->statut === 'PAYE') {
-                    app(\App\Services\PaiementService::class)->generatePdfReceipt($document->paiement);
-                    $document->refresh();
+                if ($document->type === 'CONTRAT' || $document->id_contrat) {
+                    if ($document->id_contrat) {
+                        app(\App\Services\ContratService::class)->generateAndSaveDocument($document->id_contrat);
+                        $document->refresh();
+                    }
+                } elseif ($document->type === 'RECU_PAIEMENT' || $document->id_paiement) {
+                    if ($document->paiement && $document->paiement->statut === 'PAYE') {
+                        app(\App\Services\PaiementService::class)->generatePdfReceipt($document->paiement);
+                        $document->refresh();
+                    }
                 }
             }
 
