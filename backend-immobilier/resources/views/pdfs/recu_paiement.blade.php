@@ -20,8 +20,20 @@
 
     <div class="header">
         <?php
-            $logoPath = 'C:/xampp/htdocs/Gestion-immobiliere/frontend/src/assets/logo.jpeg';
-            if (file_exists($logoPath)) {
+            $possiblePaths = [
+                public_path('logo.jpeg'),
+                base_path('public/logo.jpeg'),
+                base_path('../frontend/src/assets/logo.jpeg'),
+                'C:/xampp/htdocs/Gestion-immobiliere/frontend/src/assets/logo.jpeg',
+            ];
+            $logoPath = null;
+            foreach ($possiblePaths as $path) {
+                if (file_exists($path)) {
+                    $logoPath = $path;
+                    break;
+                }
+            }
+            if ($logoPath && file_exists($logoPath)) {
                 $logoData = base64_encode(file_get_contents($logoPath));
                 $logoSrc = 'data:image/jpeg;base64,' . $logoData;
                 echo '<img src="' . $logoSrc . '" alt="Logo" style="height: 60px;">';
