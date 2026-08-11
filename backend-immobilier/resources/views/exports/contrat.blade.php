@@ -174,7 +174,7 @@
         </div>
     </div>
 
-    <p style="text-align: right; margin-top:20px;">Fait à <strong>Tivaoune Peulh</strong>, le <strong>{{ date('d/m/Y') }}</strong></p>
+    <p style="text-align: right; margin-top:20px;">Fait à <strong>Tivaoune Peulh</strong>, le <strong>{{ $contrat->date_debut ? \Carbon\Carbon::parse($contrat->date_debut)->format('d/m/Y') : ($contrat->date_creation ? \Carbon\Carbon::parse($contrat->date_creation)->format('d/m/Y') : date('d/m/Y')) }}</strong></p>
 
     <table class="signatures">
         <tr>
