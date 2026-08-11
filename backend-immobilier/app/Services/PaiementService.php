@@ -142,8 +142,8 @@ class PaiementService
     {
         $paiementsPayes = Paiement::where('statut', 'PAYE')->get();
         foreach ($paiementsPayes as $p) {
-            $hasDoc = Document::where('id_paiement', $p->id_paiement)->exists();
-            if (!$hasDoc) {
+            $doc = Document::where('id_paiement', $p->id_paiement)->first();
+            if (!$doc || !Storage::disk('public')->exists($doc->chemin_fichier)) {
                 $this->generatePdfReceipt($p);
             }
         }
@@ -186,6 +186,10 @@ class PaiementService
                 'proprietaire' => $proprietaire,
                 'locataire' => $locataire,
             ]);
+
+            if (!Storage::disk('public')->exists('documents')) {
+                Storage::disk('public')->makeDirectory('documents');
+            }
 
             $fileName = 'documents/' . $documentData->reference . '.pdf';
             Storage::disk('public')->put($fileName, $pdf->output());

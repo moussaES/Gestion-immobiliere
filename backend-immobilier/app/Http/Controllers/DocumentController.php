@@ -68,6 +68,14 @@ class DocumentController extends Controller
         try {
             $document = Document::findOrFail($id);
             
+            // Si le fichier PDF est manquant sur le disque (ex: redémarrage conteneur), le régénérer automatiquement à la volée !
+            if (empty($document->chemin_fichier) || !Storage::disk('public')->exists($document->chemin_fichier)) {
+                if ($document->paiement && $document->paiement->statut === 'PAYE') {
+                    app(\App\Services\PaiementService::class)->generatePdfReceipt($document->paiement);
+                    $document->refresh();
+                }
+            }
+
             if (!Storage::disk('public')->exists($document->chemin_fichier)) {
                 return response()->json(['success' => false, 'message' => 'Fichier introuvable sur le disque'], 404);
             }
@@ -76,7 +84,7 @@ class DocumentController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Document non trouvé'
+                'message' => 'Document non trouvé: ' . $e->getMessage()
             ], 404);
         }
     }
