@@ -9,6 +9,8 @@ export interface Bien {
   adresse:           string;
   ville:             string;
   surface:           number;
+  nombre_pieces?:    number;
+  nombre_locataires_max?: number;
   loyer_mensuel:     number;
   charges:           number;
   description?:      string;

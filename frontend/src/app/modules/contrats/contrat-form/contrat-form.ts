@@ -52,30 +52,40 @@ export class ContratFormComponent implements OnInit {
     this.locSvc.getAll().subscribe(r => this.locataires = r.data.data || r.data);
     this.propSvc.getAll().subscribe(r => this.proprietaires = r.data.data || r.data);
 
-    // Charger les biens ET les contrats actifs pour filtrer les biens déjà occupés
+    // Charger les biens ET les contrats actifs pour filtrer selon la capacité max de locataires (nombre_locataires_max)
     this.contratSvc.getAll().subscribe((contratsRes: any) => {
       const tousContrats = contratsRes.data.data || contratsRes.data || [];
 
-      // IDs des biens ayant un contrat LOCATAIRE actif (déjà occupés)
-      const biensOccupes = new Set<number>(
-        tousContrats
-          .filter((c: any) => c.statut === 'ACTIF' && c.type_contrat === 'LOCATAIRE')
-          .map((c: any) => Number(c.id_bien))
-      );
+      // Compter le nombre de contrats LOCATAIRE actifs par bien
+      const nombreActifsParBien: { [key: number]: number } = {};
+      tousContrats
+        .filter((c: any) => c.statut === 'ACTIF' && c.type_contrat === 'LOCATAIRE')
+        .forEach((c: any) => {
+          const idBien = Number(c.id_bien);
+          nombreActifsParBien[idBien] = (nombreActifsParBien[idBien] || 0) + 1;
+        });
 
       this.bienSvc.getAll().subscribe(r => {
         const tousBiens = r.data.data || r.data;
 
         if (this.isEdit && this.contratId) {
-          // En mode édition : on réintègre le bien du contrat courant dans la liste
+          // En mode édition : réintégrer le bien du contrat courant
           const contratCourant = tousContrats.find((c: any) => c.id_contrat == this.contratId);
           const idBienCourant = contratCourant ? Number(contratCourant.id_bien) : null;
-          this.biens = tousBiens.filter((b: any) =>
-            !biensOccupes.has(Number(b.id_bien)) || Number(b.id_bien) === idBienCourant
-          );
+          this.biens = tousBiens.filter((b: any) => {
+            const idBien = Number(b.id_bien || b.id);
+            const maxLoc = Number(b.nombre_locataires_max) || 1;
+            const nbActifs = nombreActifsParBien[idBien] || 0;
+            return idBien === idBienCourant || nbActifs < maxLoc;
+          });
         } else {
-          // En mode création : seulement les biens sans contrat LOCATAIRE actif
-          this.biens = tousBiens.filter((b: any) => !biensOccupes.has(Number(b.id_bien)));
+          // En mode création : inclure seulement les biens dont la capacité max n'est pas encore atteinte
+          this.biens = tousBiens.filter((b: any) => {
+            const idBien = Number(b.id_bien || b.id);
+            const maxLoc = Number(b.nombre_locataires_max) || 1;
+            const nbActifs = nombreActifsParBien[idBien] || 0;
+            return nbActifs < maxLoc;
+          });
         }
       });
     });

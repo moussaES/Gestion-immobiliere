@@ -37,6 +37,7 @@ export class BienFormComponent implements OnInit {
       adresse:         ['', Validators.required],
       ville:           ['', Validators.required],
       surface:         [0, [Validators.required, Validators.min(1)]],
+      nombre_locataires_max: [1, [Validators.required, Validators.min(1)]],
       loyer_mensuel:   [0, [Validators.required, Validators.min(1)]],
       description:     [''],
       statut:          ['LIBRE', Validators.required],

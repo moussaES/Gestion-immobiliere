@@ -18,6 +18,7 @@ class BienResource extends JsonResource
             'code_postal' => $this->code_postal,
             'surface' => $this->surface,
             'nombre_pieces' => $this->nombre_pieces,
+            'nombre_locataires_max' => $this->nombre_locataires_max ?? 1,
             'loyer_mensuel' => $this->loyer_mensuel,
             'statut' => $this->statut,
             'description' => $this->description,

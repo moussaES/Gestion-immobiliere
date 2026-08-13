@@ -21,6 +21,7 @@ class StoreBienRequest extends FormRequest
             'code_postal' => 'sometimes|string|max:10',
             'surface' => 'sometimes|numeric|min:0',
             'nombre_pieces' => 'sometimes|integer|min:0',
+            'nombre_locataires_max' => 'sometimes|nullable|integer|min:1',
             'loyer_mensuel' => 'required|numeric|min:0',
             'statut' => 'sometimes|in:OCCUPE,LIBRE,RESERVE',
             'description' => 'sometimes|string|nullable',

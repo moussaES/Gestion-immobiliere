@@ -52,6 +52,13 @@
         </small>
       </div>
       <div class="form-group">
+        <label>Capacité locataires (Max) *</label>
+        <input type="number" formControlName="nombre_locataires_max" min="1" [ngClass]="{'invalid-input': form.get('nombre_locataires_max')?.invalid && form.get('nombre_locataires_max')?.touched}">
+        <small class="error-text" *ngIf="form.get('nombre_locataires_max')?.invalid && form.get('nombre_locataires_max')?.touched">
+          La capacité max est requise (min 1).
+        </small>
+      </div>
+      <div class="form-group">
         <label>Loyer mensuel (FCFA) *</label>
         <input type="number" formControlName="loyer_mensuel" [ngClass]="{'invalid-input': form.get('loyer_mensuel')?.invalid && form.get('loyer_mensuel')?.touched}">
         <small class="error-text" *ngIf="form.get('loyer_mensuel')?.invalid && form.get('loyer_mensuel')?.touched">

@@ -23,6 +23,7 @@ class Bien extends Model
         'code_postal',
         'surface',
         'nombre_pieces',
+        'nombre_locataires_max',
         'loyer_mensuel',
         'statut',
         'description',
@@ -32,6 +33,7 @@ class Bien extends Model
     protected $casts = [
         'surface' => 'decimal:2',
         'loyer_mensuel' => 'decimal:2',
+        'nombre_locataires_max' => 'integer',
     ];
 
     // Relations
