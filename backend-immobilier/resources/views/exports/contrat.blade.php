@@ -177,6 +177,7 @@
         </div>
     @endif
 
+    @if($contrat->type_contrat !== 'LOCATAIRE')
     <div class="section">
         <div class="amount-box">
             <p><strong>Montant Total (Loyer) :</strong> {{ number_format($contrat->montant, 0, ',', ' ') }} FCFA</p>
@@ -185,6 +186,7 @@
             <p><strong>Part du Propriétaire (90%) :</strong> {{ number_format($contrat->montant_proprietaire, 0, ',', ' ') }} FCFA</p>
         </div>
     </div>
+    @endif
 
     <p style="text-align: right; margin-top:20px;">Fait à <strong>Tivaoune Peulh</strong>, le <strong>{{ $contrat->date_debut ? \Carbon\Carbon::parse($contrat->date_debut)->format('d/m/Y') : ($contrat->date_creation ? \Carbon\Carbon::parse($contrat->date_creation)->format('d/m/Y') : date('d/m/Y')) }}</strong></p>
 
