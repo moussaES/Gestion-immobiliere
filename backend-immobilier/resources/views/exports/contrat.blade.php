@@ -4,46 +4,49 @@
     <meta charset="UTF-8">
     <title>Contrat de {{ ucfirst(strtolower($contrat->type_contrat)) }}</title>
     <style>
+        @page {
+            margin: 10mm 12mm 10mm 12mm;
+        }
         body {
             font-family: Arial, sans-serif;
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 10.5px;
+            line-height: 1.3;
             color: #333;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
         }
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
         .header h1 {
-            font-size: 22px;
+            font-size: 15px;
             text-decoration: underline;
-            margin-bottom: 5px;
-            margin-top: 10px;
+            margin-bottom: 2px;
+            margin-top: 4px;
         }
         .header h2 {
-            font-size: 18px;
+            font-size: 13px;
             margin-bottom: 0;
         }
         .header h3 {
-            font-size: 12px;
-            margin-top: 5px;
+            font-size: 9px;
+            margin-top: 2px;
             font-weight: normal;
         }
-        .header-logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
         .section {
-            margin-bottom: 15px;
+            margin-bottom: 6px;
+        }
+        .section p {
+            margin: 3px 0;
         }
         .section h4 {
-            font-size: 15px;
+            font-size: 12px;
             text-decoration: underline;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
         }
         .article {
-            margin-bottom: 10px;
+            margin-bottom: 4px;
             text-align: justify;
         }
         .article-title {
@@ -51,7 +54,7 @@
             text-transform: uppercase;
         }
         .signatures {
-            margin-top: 40px;
+            margin-top: 20px;
             width: 100%;
         }
         .signatures td {
@@ -61,16 +64,17 @@
         }
         .amount-box {
             border: 1px solid #333;
-            padding: 10px;
-            margin-top: 15px;
+            padding: 4px 8px;
+            margin-top: 6px;
             background-color: #f9f9f9;
         }
         .amount-box p {
-            margin: 5px 0;
+            margin: 2px 0;
         }
         ul {
-            margin-top: 5px;
-            margin-bottom: 5px;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            padding-left: 18px;
         }
     </style>
 </head>
@@ -94,11 +98,11 @@
             if ($logoPath && file_exists($logoPath)) {
                 $logoData = base64_encode(file_get_contents($logoPath));
                 $logoSrc = 'data:image/jpeg;base64,' . $logoData;
-                echo '<img src="' . $logoSrc . '" alt="Logo" style="height: 60px;">';
+                echo '<img src="' . $logoSrc . '" alt="Logo" style="height: 45px;">';
             }
         ?>
         <h2>AGENCE IMMOBILIERE LES ETOILES DU SINE</h2>
-        <p style="margin:2px; font-size:11px;">Tivaoune peulh citée apix TEL / 782021500 / 752588820</p>
+        <p style="margin:1px; font-size:10px;">Tivaoune peulh citée apix TEL / 782021500 / 752588820</p>
         <h3>ACHAT-VENTE -LOCATION -GERENCE DE MAISON -BATIMENT-TERRASSEMENT -VIABILISATION -BTP</h3>
         <h1>CONTRAT DE {{ strtoupper($contrat->type_contrat) }}</h1>
     </div>
@@ -124,10 +128,10 @@
         <div class="section">
             <p><strong>L'Agence immobilière les étoiles du sine</strong> donne en location à <strong>{{ $contrat->locataire->prenom ?? '' }} {{ $contrat->locataire->nom ?? '' }}</strong> qui l'accepte ; le bien situé à {{ $contrat->bien->adresse ?? '...................' }} ({{ $contrat->bien->nom_bien ?? '...................' }}). À l'entente de l'exécution du contrat, le preneur s'acquitte des montants convenus représentant la caution et la commission non remboursable.</p>
             
-            <p style="text-decoration: underline; font-weight: bold; text-align:center;">DUREE DU CONTRAT</p>
+            <p style="text-decoration: underline; font-weight: bold; text-align:center; margin: 4px 0;">DUREE DU CONTRAT</p>
             <p>Le contrat est valable pour une durée de 1 an renouvelable. Le présent bail est fait d'une durée déterminée qui commence à courir à compter du <strong>{{ $contrat->date_debut ? $contrat->date_debut->format('d/m/Y') : '...................' }}</strong> pour prendre fin le <strong>{{ $contrat->date_fin ? $contrat->date_fin->format('d/m/Y') : '...................' }}</strong>.</p>
             
-            <p style="text-decoration: underline; font-weight: bold; text-align:center;">CHARGES ET CONDITIONS</p>
+            <p style="text-decoration: underline; font-weight: bold; text-align:center; margin: 4px 0;">CHARGES ET CONDITIONS</p>
             
             <div class="article">
                 <span class="article-title">Article 1 :</span> Le bailleur est tenu de délivrer au locataire, les locaux loués en bon état d'usage et de réparation.
@@ -181,14 +185,14 @@
     <div class="section">
         <div class="amount-box">
             <p><strong>Montant Total (Loyer) :</strong> {{ number_format($contrat->montant, 0, ',', ' ') }} FCFA</p>
-            <hr>
+            <hr style="margin: 2px 0;">
             <p><strong>Commission de l'Agence (10%) :</strong> {{ number_format($contrat->commission_agence, 0, ',', ' ') }} FCFA</p>
             <p><strong>Part du Propriétaire (90%) :</strong> {{ number_format($contrat->montant_proprietaire, 0, ',', ' ') }} FCFA</p>
         </div>
     </div>
     @endif
 
-    <p style="text-align: right; margin-top:20px;">Fait à <strong>Tivaoune Peulh</strong>, le <strong>{{ $contrat->date_debut ? \Carbon\Carbon::parse($contrat->date_debut)->format('d/m/Y') : ($contrat->date_creation ? \Carbon\Carbon::parse($contrat->date_creation)->format('d/m/Y') : date('d/m/Y')) }}</strong></p>
+    <p style="text-align: right; margin-top:10px; margin-bottom: 10px;">Fait à <strong>Tivaoune Peulh</strong>, le <strong>{{ $contrat->date_debut ? \Carbon\Carbon::parse($contrat->date_debut)->format('d/m/Y') : ($contrat->date_creation ? \Carbon\Carbon::parse($contrat->date_creation)->format('d/m/Y') : date('d/m/Y')) }}</strong></p>
 
     <table class="signatures">
         <tr>
@@ -198,8 +202,6 @@
                 @else
                     <strong>LE MANDATAIRE</strong>
                 @endif
-                <br><br><br><br><br>
-                <em>(Signature et Cachet)</em>
             </td>
             <td>
                 @if($contrat->type_contrat === 'LOCATAIRE')
@@ -207,8 +209,6 @@
                 @else
                     <strong>LE PROPRIÉTAIRE</strong>
                 @endif
-                <br><br><br><br><br>
-                <em>(Signature)</em>
             </td>
         </tr>
     </table>
