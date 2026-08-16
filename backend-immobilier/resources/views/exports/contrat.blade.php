@@ -193,7 +193,12 @@
     <table class="signatures">
         <tr>
             <td>
-                <strong>LE BAILLEUR / SON MANDATAIRE</strong><br><br><br><br><br>
+                @if($contrat->type_contrat === 'LOCATAIRE')
+                    <strong>LE BAILLEUR / SON MANDATAIRE</strong>
+                @else
+                    <strong>LE MANDATAIRE</strong>
+                @endif
+                <br><br><br><br><br>
                 <em>(Signature et Cachet)</em>
             </td>
             <td>
