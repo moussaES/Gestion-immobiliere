@@ -24,6 +24,7 @@ export interface DashboardStats {
   contrats_actifs:     number;
   revenu_mensuel:      number;
   paiements_en_attente:number;
+  paiements_en_attente_global?: number;
   taux_occupation:     number;
   loyers_attendus:     number;
   part_proprietaire_attendue: number;

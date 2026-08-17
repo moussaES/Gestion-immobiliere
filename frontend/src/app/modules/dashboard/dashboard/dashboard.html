@@ -34,10 +34,10 @@
     </app-stat-card>
     
     <app-stat-card 
-      title="PAIEMENTS EN ATTENTE / IMPAYÉS" 
+      title="PAIEMENTS EN ATTENTE (CE MOIS)" 
       [value]="stats.paiements_en_attente" 
       [isCurrency]="true"
-      subtitle="Loyers attendus du mois : {{ stats.loyers_attendus | number }} FCFA"
+      subtitle="Loyers attendus : {{ stats.loyers_attendus | number }} FCFA | Cumul impayés : {{ (stats.paiements_en_attente_global || stats.paiements_en_attente) | number }} FCFA"
       badge="PA" 
       color="orange">
     </app-stat-card>
@@ -65,7 +65,7 @@
     </app-stat-card>
 
     <app-stat-card 
-      title="LOYERS COLLECTÉS (GLOBAL)" 
+      title="LOYERS COLLECTÉS (CE MOIS)" 
       [value]="stats.revenu_mensuel" 
       [isCurrency]="true"
       badge="REV" 

@@ -154,7 +154,10 @@ Route::middleware('api')->group(function () {
         $revenu_mensuel = \App\Models\Paiement::whereMonth('date_paiement', date('m'))
                             ->whereYear('date_paiement', date('Y'))
                             ->where('statut', 'PAYE')->sum('montant');
-        $paiements_en_attente = \App\Models\Paiement::whereIn('statut', ['EN_ATTENTE', 'IMPAYE'])->sum('montant');
+        $paiements_en_attente = \App\Models\Paiement::whereMonth('date_paiement', date('m'))
+                            ->whereYear('date_paiement', date('Y'))
+                            ->whereIn('statut', ['EN_ATTENTE', 'IMPAYE'])->sum('montant');
+        $paiements_en_attente_global = \App\Models\Paiement::whereIn('statut', ['EN_ATTENTE', 'IMPAYE'])->sum('montant');
         $taux_occupation = $total_biens > 0 ? round(($biens_occupes / $total_biens) * 100, 2) : 0;
 
         // Nouvelles statistiques:
@@ -188,6 +191,7 @@ Route::middleware('api')->group(function () {
                 'contrats_actifs' => $contrats_actifs,
                 'revenu_mensuel' => $revenu_mensuel,
                 'paiements_en_attente' => $paiements_en_attente,
+                'paiements_en_attente_global' => $paiements_en_attente_global,
                 'taux_occupation' => $taux_occupation,
                 'loyers_attendus' => $loyers_attendus,
                 'part_proprietaire_attendue' => $part_proprietaire_attendue,
