@@ -36,15 +36,16 @@ class AuthController extends Controller
                 ], 403);
             }
 
-            // Génération d'un token aléatoire pour la session frontend
+            // Génération d'un token aléatoire pour la session frontend (valable 30 min / 1800 sec)
             $token = Str::random(60);
 
             return response()->json([
-                'success' => true,
-                'token'   => $token,
+                'success'    => true,
+                'token'      => $token,
                 'token_type' => 'Bearer',
-                'user'    => $user,
-                'message' => 'Connexion réussie.'
+                'expires_in' => 1800, // 30 minutes
+                'user'       => $user,
+                'message'    => 'Connexion réussie.'
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
