@@ -70,22 +70,21 @@ class PaiementService
     public function genererPaiementsMensuelsEtMettreAJourImpayes()
     {
         $now = \Carbon\Carbon::now();
-        $previousMonthDate = $now->copy()->subMonth();
         
         $moisNoms = [
             1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril', 5 => 'mai', 6 => 'juin',
             7 => 'juillet', 8 => 'août', 9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre'
         ];
         
-        // Exemple : Le 1er septembre, on génère les paiements en attente du mois d'août
-        $moisLibelle = ($moisNoms[$previousMonthDate->month] ?? '') . ' ' . $previousMonthDate->year;
+        // Mois en cours (ex : septembre 2026)
+        $moisLibelle = ($moisNoms[$now->month] ?? '') . ' ' . $now->year;
 
-        // 1. Basculer les paiements en attente des mois précédents en IMPAYE (ex: le 1er octobre pour le loyer d'août non réglé)
+        // 1. Basculer les paiements en attente des mois précédents en IMPAYE
         Paiement::where('statut', 'EN_ATTENTE')
             ->whereDate('date_paiement', '<', $now->copy()->startOfMonth())
             ->update(['statut' => 'IMPAYE']);
 
-        // 2. Générer les nouveaux paiements pour le mois écoulé pour chaque contrat locataire ACTIF
+        // 2. Générer les nouveaux paiements pour le mois en cours pour chaque contrat locataire ACTIF
         $contratsActifs = \App\Models\Contrat::where('statut', 'ACTIF')
             ->where('type_contrat', 'LOCATAIRE')
             ->get();
