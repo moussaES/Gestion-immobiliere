@@ -8,6 +8,7 @@ export interface Locataire {
   adresse:        string;
   profession:     string;
   cni:            string;
+  statut?:        'ACTIF' | 'INACTIF' | 'actif' | 'inactif';
   date_creation?:  string;
   contrats_count?: number;
 }

@@ -31,15 +31,29 @@ class Locataire extends Model
         return $this->hasMany(Contrat::class, 'id_locataire', 'id_locataire');
     }
 
+    protected $appends = ['statut', 'nom_complet'];
+
     // Accessors
     public function getNomCompletAttribute()
     {
         return $this->prenom . ' ' . $this->nom;
     }
 
+    public function getStatutAttribute()
+    {
+        $hasActive = $this->contrats()
+            ->where('type_contrat', 'LOCATAIRE')
+            ->where('statut', 'ACTIF')
+            ->exists();
+
+        return $hasActive ? 'ACTIF' : 'INACTIF';
+    }
+
     // Scopes
     public function scopeActif($query)
     {
-        return $query->whereNotNull('email');
+        return $query->whereHas('contrats', function ($q) {
+            $q->where('type_contrat', 'LOCATAIRE')->where('statut', 'ACTIF');
+        });
     }
 }

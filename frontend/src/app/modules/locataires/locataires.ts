@@ -19,12 +19,14 @@ import { Locataire } from '../../core/models';
       <div class="filter-bar">
         <div class="search-input">
           <i class="fas fa-search"></i>
-          <input type="text" placeholder="Rechercher...">
+          <input type="text" placeholder="Rechercher (nom, téléphone...)" [(ngModel)]="searchTerm" (input)="filterData()">
         </div>
         <div class="filters">
           <label>Statut</label>
-          <select>
-            <option>Tout</option>
+          <select [(ngModel)]="statutFilter" (change)="filterData()">
+            <option value="">Tout</option>
+            <option value="ACTIF">Actif</option>
+            <option value="INACTIF">Inactif</option>
           </select>
           <label>Taille</label>
           <select [(ngModel)]="pageSize" (change)="currentPage = 1">
@@ -48,7 +50,7 @@ import { Locataire } from '../../core/models';
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let loc of locataires | slice:(currentPage-1)*pageSize : currentPage*pageSize">
+            <tr *ngFor="let loc of filteredLocataires | slice:(currentPage-1)*pageSize : currentPage*pageSize">
               <td>
                 <div class="primary-text">{{ loc.nom }} {{ loc.prenom }}</div>
                 <div class="secondary-text">{{ loc.telephone }}</div>
@@ -56,20 +58,24 @@ import { Locataire } from '../../core/models';
               <td>{{ loc.profession }}</td>
               <td>{{ loc.adresse }}</td>
               <td>{{ loc.email }}</td>
-              <td><span class="badge badge-actif">Actif</span></td>
+              <td>
+                <span class="badge" [ngClass]="isActif(loc) ? 'badge-actif' : 'badge-inactif'">
+                  {{ isActif(loc) ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
               <td class="actions">
                 <a [routerLink]="['/locataires', $any(loc).id_locataire]" class="icon-btn view-btn"><i class="fas fa-eye"></i></a>
                 <a [routerLink]="['/locataires/modifier', $any(loc).id_locataire]" class="icon-btn edit-btn"><i class="fas fa-pencil-alt"></i></a>
               </td>
             </tr>
-            <tr *ngIf="locataires.length === 0">
+            <tr *ngIf="filteredLocataires.length === 0">
               <td colspan="6" class="empty-state">Aucun locataire trouvé.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="pagination-controls" *ngIf="locataires.length > pageSize">
+      <div class="pagination-controls" *ngIf="filteredLocataires.length > pageSize">
         <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">&laquo;</button>
         <button *ngFor="let p of pages" [class.active]="p === currentPage" (click)="currentPage = p">{{ p }}</button>
         <button [disabled]="currentPage === pages.length" (click)="currentPage = currentPage + 1">&raquo;</button>
@@ -106,8 +112,9 @@ import { Locataire } from '../../core/models';
     .primary-text { color: #1a237e; font-weight: 600; margin-bottom: 4px; }
     .secondary-text { color: #666; font-size: 12px; }
     
-    .badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; text-align: center; }
     .badge-actif { background: #e8f5e9; color: #2e7d32; }
+    .badge-inactif { background: #ffebee; color: #c62828; }
     
     .actions { text-align: right; }
     .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; text-decoration: none; transition: background 0.2s; margin-left: 8px; }
@@ -127,11 +134,14 @@ import { Locataire } from '../../core/models';
 })
 export class LocatairesComponent implements OnInit {
   locataires: Locataire[] = [];
+  filteredLocataires: Locataire[] = [];
   pageSize: number = 5;
   currentPage: number = 1;
+  searchTerm: string = '';
+  statutFilter: string = '';
 
   get pages(): number[] {
-    const total = Math.ceil(this.locataires.length / this.pageSize);
+    const total = Math.ceil(this.filteredLocataires.length / this.pageSize);
     return Array.from({ length: total }, (_, i) => i + 1);
   }
 
@@ -148,12 +158,38 @@ export class LocatairesComponent implements OnInit {
     this.locSvc.getAll().subscribe({
       next: (res: any) => {
         this.locataires = res.data?.data ? res.data.data : (res.data || []);
+        this.filterData();
       },
       error: (err) => {
         console.error('Erreur', err);
         this.toastSvc.error('Impossible de charger la liste des locataires');
       }
     });
+  }
+
+  filterData(): void {
+    this.filteredLocataires = this.locataires.filter(loc => {
+      const isAct = this.isActif(loc);
+      const matchStatut = !this.statutFilter ? true : (this.statutFilter === 'ACTIF' ? isAct : !isAct);
+      
+      const search = this.searchTerm.toLowerCase();
+      const matchSearch = !search ? true : (
+        (loc.nom && loc.nom.toLowerCase().includes(search)) ||
+        (loc.prenom && loc.prenom.toLowerCase().includes(search)) ||
+        (loc.telephone && loc.telephone.toLowerCase().includes(search)) ||
+        (loc.email && loc.email.toLowerCase().includes(search))
+      );
+
+      return matchStatut && matchSearch;
+    });
+    this.currentPage = 1;
+  }
+
+  isActif(loc: Locataire): boolean {
+    if (loc.statut) {
+      return loc.statut.toUpperCase() === 'ACTIF';
+    }
+    return false;
   }
 
   supprimer(id: number): void {

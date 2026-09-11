@@ -18,6 +18,7 @@ class LocataireResource extends JsonResource
             'profession' => $this->profession,
             'adresse' => $this->adresse,
             'cni' => $this->cni,
+            'statut' => $this->statut,
             'date_creation' => $this->date_creation,
             'date_modification' => $this->date_modification,
         ];
