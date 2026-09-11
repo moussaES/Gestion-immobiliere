@@ -8,21 +8,24 @@
       title="BIENS OCCUPÉS" 
       [value]="stats.biens_occupes" 
       badge="BO" 
-      color="purple">
+      color="purple"
+      link="/biens">
     </app-stat-card>
     
     <app-stat-card 
       title="BIENS LIBRES" 
       [value]="stats.biens_libres" 
       badge="BL" 
-      color="cyan">
+      color="cyan"
+      link="/biens">
     </app-stat-card>
     
     <app-stat-card 
       title="TOTAL BIENS" 
       [value]="stats.total_biens" 
       badge="TB" 
-      color="blue">
+      color="blue"
+      link="/biens">
     </app-stat-card>
 
     <!-- Row 2 -->
@@ -30,7 +33,8 @@
       title="CONTRATS ACTIFS" 
       [value]="stats.contrats_actifs" 
       badge="CA" 
-      color="red">
+      color="red"
+      link="/contrats">
     </app-stat-card>
     
     <app-stat-card 
@@ -39,14 +43,16 @@
       [isCurrency]="true"
       subtitle="Loyers attendus : {{ stats.loyers_attendus | number }} FCFA | Cumul impayés : {{ (stats.paiements_en_attente_global || stats.paiements_en_attente) | number }} FCFA"
       badge="PA" 
-      color="orange">
+      color="orange"
+      link="/paiements">
     </app-stat-card>
     
     <app-stat-card 
       title="PROPRIÉTAIRES" 
       [value]="stats.total_proprietaires" 
       badge="PR" 
-      color="pink">
+      color="pink"
+      link="/proprietaires">
     </app-stat-card>
 
     <!-- Row 3 -->
@@ -54,14 +60,16 @@
       title="LOCATAIRES" 
       [value]="stats.total_locataires" 
       badge="LO" 
-      color="magenta">
+      color="magenta"
+      link="/locataires">
     </app-stat-card>
 
     <app-stat-card 
       title="TAUX D'OCCUPATION" 
       [value]="stats.taux_occupation + '%'" 
       badge="%" 
-      color="cyan">
+      color="cyan"
+      link="/biens">
     </app-stat-card>
 
     <app-stat-card 
@@ -69,7 +77,8 @@
       [value]="stats.revenu_mensuel" 
       [isCurrency]="true"
       badge="REV" 
-      color="green">
+      color="green"
+      link="/paiements">
     </app-stat-card>
 
     <!-- Row 4 : Nouvelles cartes -->
@@ -80,7 +89,8 @@
       [isCurrency]="true"
       subtitle="Attendu : {{ stats.revenus_agence_attendus | number }} FCFA"
       badge="BLL" 
-      color="blue">
+      color="blue"
+      link="/paiements">
     </app-stat-card>
 
   </div>

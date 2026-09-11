@@ -116,11 +116,12 @@ export class AuthService {
   getCurrentUser(): Utilisateur | null { return this.currentUserSubject.value; }
 
   hasRole(role: string): boolean {
-    return this.getCurrentUser()?.role === role;
+    const userRole = this.getCurrentUser()?.role;
+    return !!userRole && userRole.toUpperCase() === role.toUpperCase();
   }
 
   hasAnyRole(roles: string[]): boolean {
     const userRole = this.getCurrentUser()?.role;
-    return !!userRole && roles.includes(userRole);
+    return !!userRole && roles.map(r => r.toUpperCase()).includes(userRole.toUpperCase());
   }
 }
