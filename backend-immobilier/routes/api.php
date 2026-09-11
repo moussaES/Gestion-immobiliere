@@ -145,6 +145,22 @@ Route::middleware('api')->group(function () {
         // Auto-génération des paiements du mois et maj des impayés
         app(\App\Services\PaiementService::class)->genererPaiementsMensuelsEtMettreAJourImpayes();
 
+        // Auto-synchronisation des statuts des biens (OCCUPE vs LIBRE) selon les contrats locataires actifs
+        $biensAvecContratActifIds = \App\Models\Contrat::where('statut', 'ACTIF')
+            ->where('type_contrat', 'LOCATAIRE')
+            ->pluck('id_bien')
+            ->filter()
+            ->unique()
+            ->toArray();
+
+        \App\Models\Bien::whereIn('id_bien', $biensAvecContratActifIds)
+            ->where('statut', '!=', 'OCCUPE')
+            ->update(['statut' => 'OCCUPE']);
+
+        \App\Models\Bien::whereNotIn('id_bien', $biensAvecContratActifIds)
+            ->where('statut', '!=', 'LIBRE')
+            ->update(['statut' => 'LIBRE']);
+
         $total_biens = \App\Models\Bien::count();
         $biens_libres = \App\Models\Bien::where('statut', 'libre')->count();
         $biens_occupes = \App\Models\Bien::where('statut', 'occupe')->count();
