@@ -150,7 +150,9 @@ Route::middleware('api')->group(function () {
         $biens_occupes = \App\Models\Bien::where('statut', 'occupe')->count();
         $total_proprietaires = \App\Models\Proprietaire::count();
         $total_locataires = \App\Models\Locataire::count();
-        $contrats_actifs = \App\Models\Contrat::where('statut', 'ACTIF')->count();
+        $contrats_actifs = \App\Models\Contrat::where('statut', 'ACTIF')
+                            ->where('type_contrat', 'LOCATAIRE')
+                            ->count();
         $revenu_mensuel = \App\Models\Paiement::whereMonth('date_paiement', date('m'))
                             ->whereYear('date_paiement', date('Y'))
                             ->where('statut', 'PAYE')->sum('montant');
